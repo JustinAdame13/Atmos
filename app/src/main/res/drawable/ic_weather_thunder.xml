@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="64dp"
+    android:height="64dp"
+    android:viewportWidth="64"
+    android:viewportHeight="64">
+
+    <!-- Nube oscura -->
+    <path
+        android:fillColor="#546E7A"
+        android:pathData="
+            M50,36
+            C50,36 52,35 52,32
+            C52,27 48,24 44,24
+            C43,24 42,24 41,25
+            C40,20 35,16 29,16
+            C22,16 16,22 16,29
+            C16,29 14,29 13,30
+            C11,31 10,33 10,35
+            C10,38 12,40 15,40
+            L48,40
+            C49,40 50,39 50,38
+            C50,37 50,36 50,36 Z" />
+
+    <!-- Rayo izquierdo -->
+    <path
+        android:fillColor="#FFD54F"
+        android:pathData="
+            M26,42
+            L20,54
+            L25,54
+            L20,64
+            L30,50
+            L25,50
+            L30,42 Z" />
+
+    <!-- Rayo derecho -->
+    <path
+        android:fillColor="#FFD54F"
+        android:pathData="
+            M40,42
+            L34,54
+            L39,54
+            L34,64
+            L44,50
+            L39,50
+            L44,42 Z" />
+
+</vector>

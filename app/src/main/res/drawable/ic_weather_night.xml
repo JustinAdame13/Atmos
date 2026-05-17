@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="64dp"
+    android:height="64dp"
+    android:viewportWidth="64"
+    android:viewportHeight="64">
+
+    <!-- Luna creciente -->
+    <path
+        android:fillColor="#FFD54F"
+        android:pathData="
+            M38,10
+            C28,10 20,18 20,28
+            C20,38 28,46 38,46
+            C42,46 46,44 49,41
+            C45,40 42,37 40,33
+            C38,29 38,24 40,20
+            C42,16 45,13 49,12
+            C46,11 42,10 38,10 Z" />
+
+    <!-- Estrella pequeña 1 -->
+    <path
+        android:fillColor="#FFD54F"
+        android:pathData="
+            M54,20 L55,23 L58,23 L56,25 L57,28 L54,26 L51,28 L52,25 L50,23 L53,23 Z" />
+
+    <!-- Estrella pequeña 2 -->
+    <path
+        android:fillColor="#FFD54F"
+        android:pathData="
+            M54,38 L55,40 L57,40 L55,42 L56,44 L54,42 L52,44 L53,42 L51,40 L53,40 Z" />
+
+</vector>
