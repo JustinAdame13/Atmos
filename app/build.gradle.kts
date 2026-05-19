@@ -8,6 +8,7 @@ android {
         version = release(36) {
             minorApiLevel = 1
         }
+
     }
 
     defaultConfig {
@@ -18,6 +19,15 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        val localProps = org.jetbrains.kotlin.konan.properties.loadProperties(
+            rootProject.file("local.properties").absolutePath
+        )
+        buildConfigField(
+            "String",
+            "OPENWEATHER_API_KEY",
+            "\"${localProps["OPENWEATHER_API_KEY"]}\""
+        )
     }
 
     buildTypes {
@@ -32,6 +42,10 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+    }
+
+    buildFeatures {
+        buildConfig = true
     }
 }
 
