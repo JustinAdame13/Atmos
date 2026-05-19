@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="64dp"
+    android:height="64dp"
+    android:viewportWidth="64"
+    android:viewportHeight="64">
+
+    <!-- Nube oscura -->
+    <path
+        android:fillColor="#78909C"
+        android:pathData="
+            M50,36
+            C50,36 52,35 52,32
+            C52,27 48,24 44,24
+            C43,24 42,24 41,25
+            C40,20 35,16 29,16
+            C22,16 16,22 16,29
+            C16,29 14,29 13,30
+            C11,31 10,33 10,35
+            C10,38 12,40 15,40
+            L48,40
+            C49,40 50,39 50,38
+            C50,37 50,36 50,36 Z" />
+
+    <!-- Gotas de lluvia -->
+    <path
+        android:strokeColor="#4FC3F7"
+        android:strokeWidth="2.5"
+        android:strokeLineCap="round"
+        android:pathData="M20,44 L18,50" />
+    <path
+        android:strokeColor="#4FC3F7"
+        android:strokeWidth="2.5"
+        android:strokeLineCap="round"
+        android:pathData="M44,44 L42,50" />
+
+    <!-- Rayo -->
+    <path
+        android:fillColor="#FFD54F"
+        android:pathData="
+            M35,42
+            L28,54
+            L33,54
+            L27,64
+            L38,50
+            L33,50
+            L38,42 Z" />
+
+</vector>

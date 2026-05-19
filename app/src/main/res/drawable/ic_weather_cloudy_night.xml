@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="64dp"
+    android:height="64dp"
+    android:viewportWidth="64"
+    android:viewportHeight="64">
+
+    <!-- Luna creciente -->
+    <path
+        android:fillColor="#FFD54F"
+        android:pathData="
+            M34,8
+            C26,8 20,14 20,22
+            C20,30 26,36 34,36
+            C37,36 40,35 42,33
+            C39,32 37,30 36,27
+            C34,24 34,20 36,17
+            C37,14 39,12 42,11
+            C40,9 37,8 34,8 Z" />
+
+    <!-- Nube -->
+    <path
+        android:fillColor="#B0BEC5"
+        android:pathData="
+            M52,42
+            C52,42 54,41 54,38
+            C54,33 50,30 46,30
+            C45,30 44,30 43,31
+            C42,27 38,24 33,24
+            C27,24 22,29 22,35
+            C22,35 20,35 19,36
+            C17,37 16,39 16,41
+            C16,44 18,46 21,46
+            L50,46
+            C51,46 52,45 52,44
+            C52,43 52,42 52,42 Z" />
+
+</vector>

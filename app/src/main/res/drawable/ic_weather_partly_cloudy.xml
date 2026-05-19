@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="64dp"
+    android:height="64dp"
+    android:viewportWidth="64"
+    android:viewportHeight="64">
+
+    <!-- Sol -->
+    <path
+        android:fillColor="#FFD54F"
+        android:pathData="M24,22 A10,10 0 1,1 23.999,22 Z" />
+
+    <!-- Rayos del sol -->
+    <path
+        android:strokeColor="#FFD54F"
+        android:strokeWidth="2"
+        android:strokeLineCap="round"
+        android:pathData="M24,8 L24,12" />
+    <path
+        android:strokeColor="#FFD54F"
+        android:strokeWidth="2"
+        android:strokeLineCap="round"
+        android:pathData="M24,32 L24,36" />
+    <path
+        android:strokeColor="#FFD54F"
+        android:strokeWidth="2"
+        android:strokeLineCap="round"
+        android:pathData="M10,22 L14,22" />
+    <path
+        android:strokeColor="#FFD54F"
+        android:strokeWidth="2"
+        android:strokeLineCap="round"
+        android:pathData="M34,22 L38,22" />
+    <path
+        android:strokeColor="#FFD54F"
+        android:strokeWidth="2"
+        android:strokeLineCap="round"
+        android:pathData="M14,12 L17,15" />
+    <path
+        android:strokeColor="#FFD54F"
+        android:strokeWidth="2"
+        android:strokeLineCap="round"
+        android:pathData="M31,29 L34,32" />
+    <path
+        android:strokeColor="#FFD54F"
+        android:strokeWidth="2"
+        android:strokeLineCap="round"
+        android:pathData="M34,12 L31,15" />
+    <path
+        android:strokeColor="#FFD54F"
+        android:strokeWidth="2"
+        android:strokeLineCap="round"
+        android:pathData="M17,29 L14,32" />
+
+    <!-- Nube encima del sol -->
+    <path
+        android:fillColor="#B0BEC5"
+        android:pathData="
+            M54,44
+            C54,44 56,43 56,40
+            C56,35 52,32 48,32
+            C47,32 46,32 45,33
+            C44,28 39,24 33,24
+            C26,24 20,30 20,37
+            C20,37 18,37 17,38
+            C15,39 14,41 14,43
+            C14,46 16,48 19,48
+            L52,48
+            C53,48 54,47 54,46
+            C54,45 54,44 54,44 Z" />
+
+</vector>
