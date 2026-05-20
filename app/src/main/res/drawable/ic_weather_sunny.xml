@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="64dp"
+    android:height="64dp"
+    android:viewportWidth="64"
+    android:viewportHeight="64">
+
+    <!-- Círculo del sol -->
+    <path
+        android:fillColor="#FFD54F"
+        android:pathData="M32,20 A12,12 0 1,1 31.999,20 Z" />
+
+    <!-- Rayos del sol -->
+    <path
+        android:strokeColor="#FFD54F"
+        android:strokeWidth="2.5"
+        android:strokeLineCap="round"
+        android:pathData="M32,6 L32,10" />
+    <path
+        android:strokeColor="#FFD54F"
+        android:strokeWidth="2.5"
+        android:strokeLineCap="round"
+        android:pathData="M32,54 L32,58" />
+    <path
+        android:strokeColor="#FFD54F"
+        android:strokeWidth="2.5"
+        android:strokeLineCap="round"
+        android:pathData="M6,32 L10,32" />
+    <path
+        android:strokeColor="#FFD54F"
+        android:strokeWidth="2.5"
+        android:strokeLineCap="round"
+        android:pathData="M54,32 L58,32" />
+    <path
+        android:strokeColor="#FFD54F"
+        android:strokeWidth="2.5"
+        android:strokeLineCap="round"
+        android:pathData="M13.37,13.37 L16.22,16.22" />
+    <path
+        android:strokeColor="#FFD54F"
+        android:strokeWidth="2.5"
+        android:strokeLineCap="round"
+        android:pathData="M47.78,47.78 L50.63,50.63" />
+    <path
+        android:strokeColor="#FFD54F"
+        android:strokeWidth="2.5"
+        android:strokeLineCap="round"
+        android:pathData="M50.63,13.37 L47.78,16.22" />
+    <path
+        android:strokeColor="#FFD54F"
+        android:strokeWidth="2.5"
+        android:strokeLineCap="round"
+        android:pathData="M16.22,47.78 L13.37,50.63" />
+
+</vector>

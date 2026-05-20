@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="64dp"
+    android:height="64dp"
+    android:viewportWidth="64"
+    android:viewportHeight="64">
+
+    <!-- Nube principal -->
+    <path
+        android:fillColor="#B0BEC5"
+        android:pathData="
+            M50,40
+            C50,40 52,39 52,36
+            C52,31 48,28 44,28
+            C43,28 42,28 41,29
+            C40,24 35,20 29,20
+            C22,20 16,26 16,33
+            C16,33 14,33 13,34
+            C11,35 10,37 10,39
+            C10,42 12,44 15,44
+            L48,44
+            C49,44 50,43 50,42
+            C50,41 50,40 50,40 Z" />
+
+</vector>
