@@ -1,11 +1,13 @@
 package com.justin.atmos.ui;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -24,10 +26,12 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.Priority;
 import com.justin.atmos.R;
 import com.justin.atmos.model.ClimaActual;
+import com.justin.atmos.model.Pronostico;
 import com.justin.atmos.ViewModel.WeatherViewModel;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 public class HomeFragment extends Fragment {
@@ -40,7 +44,7 @@ public class HomeFragment extends Fragment {
     private LottieAnimationView lottieWeather;
     private LinearLayout containerHourly;
 
-    // ── launcher para pedir permiso ──────────────────────
+    // ── launcher para pedir permiso ──────────────────────────────────────────
     private final ActivityResultLauncher<String[]> permisosLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(),
                     permisos -> {
@@ -48,7 +52,6 @@ public class HomeFragment extends Fragment {
                                 permisos.get(Manifest.permission.ACCESS_FINE_LOCATION)) ||
                                 Boolean.TRUE.equals(
                                         permisos.get(Manifest.permission.ACCESS_COARSE_LOCATION));
-
                         if (aceptado) {
                             obtenerUbicacion();
                         } else {
@@ -68,7 +71,7 @@ public class HomeFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // ── conectar vistas ──────────────────────────────────
+        // ── conectar vistas ──────────────────────────────────────────────────
         tvCityName    = view.findViewById(R.id.tv_city_name);
         tvDate        = view.findViewById(R.id.tv_date);
         tvTemperature = view.findViewById(R.id.tv_temperature);
@@ -79,24 +82,35 @@ public class HomeFragment extends Fragment {
         lottieWeather = view.findViewById(R.id.lottie_weather);
         containerHourly = view.findViewById(R.id.container_hourly);
 
-        // ── inicializar GPS ──────────────────────────────────
+        // ── inicializar GPS ──────────────────────────────────────────────────
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity());
 
-        // ── obtener ViewModel ────────────────────────────────
+        // ── obtener ViewModel ────────────────────────────────────────────────
         viewModel = new ViewModelProvider(requireActivity()).get(WeatherViewModel.class);
 
-        // ── observar datos ───────────────────────────────────
+        // ── observar clima actual ────────────────────────────────────────────
         viewModel.climaActual.observe(getViewLifecycleOwner(), this::actualizarUI);
+
+        // ── observar pronóstico para llenar las celdas horarias ──────────────
+        viewModel.pronostico.observe(getViewLifecycleOwner(), this::actualizarHorario);
+
+        // ── observar errores ─────────────────────────────────────────────────
         viewModel.error.observe(getViewLifecycleOwner(), error ->
                 Toast.makeText(requireContext(), error, Toast.LENGTH_SHORT).show());
 
-        // ── si ya hay datos no pedimos ubicación de nuevo ────
+        // ── si ya hay datos no pedimos ubicación de nuevo ────────────────────
         if (viewModel.climaActual.getValue() != null) {
             actualizarUI(viewModel.climaActual.getValue());
         } else {
             verificarPermisos();
         }
+
+        if (viewModel.pronostico.getValue() != null) {
+            actualizarHorario(viewModel.pronostico.getValue());
+        }
     }
+
+    // ── permisos y GPS ────────────────────────────────────────────────────────
 
     private void verificarPermisos() {
         boolean fineLoc = ContextCompat.checkSelfPermission(requireContext(),
@@ -130,7 +144,6 @@ public class HomeFragment extends Fragment {
                                 location.getLongitude()
                         );
                     } else {
-                        // GPS no disponible, ir a search
                         navegarASearch();
                     }
                 })
@@ -144,6 +157,8 @@ public class HomeFragment extends Fragment {
             nav.setSelectedItemId(R.id.nav_search);
         }
     }
+
+    // ── actualizar UI principal ───────────────────────────────────────────────
 
     private void actualizarUI(ClimaActual clima) {
         tvCityName.setText(clima.cityName);
@@ -169,6 +184,90 @@ public class HomeFragment extends Fragment {
         lottieWeather.playAnimation();
     }
 
+    // ── actualizar pronóstico horario ─────────────────────────────────────────
+
+    private void actualizarHorario(Pronostico pronostico) {
+        if (containerHourly == null || pronostico == null || pronostico.list == null) return;
+
+        containerHourly.removeAllViews();
+
+        // Determinar el día actual (clave "yyyy-MM-dd")
+        SimpleDateFormat sdfDia = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        String hoy = sdfDia.format(new Date());
+
+        // Filtrar los registros de hoy; si no hay suficientes (tarde en el día),
+        // incluir también los primeros del día siguiente hasta completar 8.
+        List<Pronostico.ForecastItem> todos = pronostico.list;
+        int agregados = 0;
+
+        for (Pronostico.ForecastItem item : todos) {
+            if (agregados >= 8) break;
+            String diaItem = sdfDia.format(new Date(item.dt * 1000L));
+            if (diaItem.equals(hoy) || agregados > 0) {
+                // Si ya empezamos a agregar, continuamos hasta 8
+                agregarCeldaHoraria(item, pronostico.city.sunrise, pronostico.city.sunset);
+                agregados++;
+            } else if (diaItem.compareTo(hoy) >= 0) {
+                // Primera coincidencia con hoy o día posterior
+                agregarCeldaHoraria(item, pronostico.city.sunrise, pronostico.city.sunset);
+                agregados++;
+            }
+        }
+
+        // Si no encontramos ninguno del día actual, usar los primeros 8
+        if (agregados == 0) {
+            int max = Math.min(8, todos.size());
+            for (int i = 0; i < max; i++) {
+                Pronostico.ForecastItem item = todos.get(i);
+                agregarCeldaHoraria(item, pronostico.city.sunrise, pronostico.city.sunset);
+            }
+        }
+    }
+
+    /**
+     * Infla item_hourly.xml y lo agrega al container_hourly con los datos del item.
+     */
+    private void agregarCeldaHoraria(Pronostico.ForecastItem item,
+                                     long sunrise, long sunset) {
+        Context ctx = requireContext();
+        View celda = LayoutInflater.from(ctx)
+                .inflate(R.layout.item_hourly, containerHourly, false);
+
+        // Hora
+        TextView tvHour = celda.findViewById(R.id.tv_hour);
+        SimpleDateFormat sdfHora = new SimpleDateFormat("HH:mm", Locale.getDefault());
+        tvHour.setText(sdfHora.format(new Date(item.dt * 1000L)));
+
+        // Temperatura
+        TextView tvTemp = celda.findViewById(R.id.tv_hourly_temp);
+        tvTemp.setText(String.format(Locale.getDefault(), "%.0f°", item.main.temp));
+
+        // Ícono (drawable estático)
+        ImageView ivIcon = celda.findViewById(R.id.iv_hourly_icon);
+        if (item.weather != null && !item.weather.isEmpty()) {
+            int iconRes = elegirIconoDrawable(
+                    item.weather.get(0).id, item.dt, sunrise, sunset);
+            ivIcon.setImageResource(iconRes);
+        }
+
+        // Margen en el primer ítem
+        if (containerHourly.getChildCount() == 0) {
+            LinearLayout.LayoutParams params =
+                    (LinearLayout.LayoutParams) celda.getLayoutParams();
+            if (params == null) {
+                params = new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT);
+            }
+            params.setMarginStart(0);
+            celda.setLayoutParams(params);
+        }
+
+        containerHourly.addView(celda);
+    }
+
+    // ── helpers para elegir animación / ícono ─────────────────────────────────
+
     private int elegirAnimacion(int weatherId, long ahora, long sunrise, long sunset) {
         boolean esDeNoche = ahora < sunrise || ahora > sunset;
 
@@ -182,5 +281,23 @@ public class HomeFragment extends Fragment {
             return esDeNoche ? R.raw.anim_cloudy_night : R.raw.anim_cloudy_day;
         }
         return esDeNoche ? R.raw.anim_night : R.raw.anim_sunny;
+    }
+
+    /**
+     * Versión que devuelve un drawable (para las celdas horarias pequeñas).
+     */
+    private int elegirIconoDrawable(int weatherId, long ahora, long sunrise, long sunset) {
+        boolean esDeNoche = ahora < sunrise || ahora > sunset;
+
+        if (weatherId >= 200 && weatherId <= 232) return R.drawable.ic_weather_storm;
+        if (weatherId >= 781 && weatherId <= 799) return R.drawable.ic_weather_thunder;
+        if ((weatherId >= 300 && weatherId <= 321) ||
+                (weatherId >= 500 && weatherId <= 531)) {
+            return R.drawable.ic_weather_rainy;
+        }
+        if (weatherId >= 600 && weatherId <= 780) {
+            return esDeNoche ? R.drawable.ic_weather_cloudy_night : R.drawable.ic_weather_cloudy;
+        }
+        return esDeNoche ? R.drawable.ic_weather_night : R.drawable.ic_weather_sunny;
     }
 }
