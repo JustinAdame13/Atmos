@@ -17,6 +17,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.justin.atmos.R;
 import com.justin.atmos.Adapter.ForecastAdapter;
 import com.justin.atmos.ViewModel.WeatherViewModel;
+import com.justin.atmos.Adapter.FavoritesAdapter;
+import com.justin.atmos.Adapter.ForecastAdapter;
 
 public class ForecastFragment extends Fragment {
 

@@ -56,9 +56,12 @@ public class ClimaActual {
 
     public static class Sys {
         @SerializedName("sunrise")
-        public long sunrise; // Unix timestamp
+        public long sunrise;
 
         @SerializedName("sunset")
-        public long sunset;  // Unix timestamp
+        public long sunset;
+
+        @SerializedName("country")
+        public String country;
     }
 }
