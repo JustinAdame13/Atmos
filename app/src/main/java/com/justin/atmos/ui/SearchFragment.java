@@ -27,8 +27,6 @@ public class SearchFragment extends Fragment {
     private SearchAdapter adapter;
     private LinearLayout layoutEmpty;
     private RecyclerView rvResults;
-
-    // ── bandera para saber si la búsqueda fue iniciada en este fragment ──────
     private boolean busquedaIniciada = false;
 
     @Nullable
@@ -53,8 +51,9 @@ public class SearchFragment extends Fragment {
         rvResults.setLayoutManager(new LinearLayoutManager(requireContext()));
         rvResults.setAdapter(adapter);
 
-        // ── al tocar la tarjeta navega a Home ────────────────────────────────
+        // ── al tocar la tarjeta carga en Home y navega ───────────────────────
         adapter.setOnItemClickListener(clima -> {
+            viewModel.cargarCiudadEnHome(clima);
             navegarAHome();
         });
 
@@ -85,8 +84,8 @@ public class SearchFragment extends Fragment {
             return false;
         });
 
-        // ── observar resultados del clima ────────────────────────────────────
-        viewModel.climaActual.observe(getViewLifecycleOwner(), clima -> {
+        // ── observar resultados de búsqueda (no toca climaActual) ────────────
+        viewModel.climaBusqueda.observe(getViewLifecycleOwner(), clima -> {
             if (clima != null && busquedaIniciada) {
                 adapter.setClima(clima);
                 mostrarResultados(true);
@@ -103,9 +102,9 @@ public class SearchFragment extends Fragment {
             }
         });
 
-        // ── si ya hay datos previos mostrarlos sin navegar ───────────────────
-        if (viewModel.climaActual.getValue() != null) {
-            adapter.setClima(viewModel.climaActual.getValue());
+        // ── si ya hay datos previos de búsqueda mostrarlos ───────────────────
+        if (viewModel.climaBusqueda.getValue() != null) {
+            adapter.setClima(viewModel.climaBusqueda.getValue());
             mostrarResultados(true);
         }
     }
@@ -116,13 +115,11 @@ public class SearchFragment extends Fragment {
         busquedaIniciada = false;
     }
 
-    // ── métodos privados ─────────────────────────────────────────────────────
+    // ── métodos privados ──────────────────────────────────────────────────────
 
     private void buscarCiudad(String ciudad) {
         adapter.setClima(null);
         mostrarResultados(false);
-        // La API busca por nombre parcial automáticamente,
-        // por ejemplo "Tor" puede encontrar "Torreón"
         viewModel.buscarClima(ciudad);
     }
 
