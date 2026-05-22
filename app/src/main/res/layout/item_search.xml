@@ -18,11 +18,13 @@
         android:paddingVertical="14dp">
 
         <!-- Ícono del clima -->
-        <ImageView
+        <com.airbnb.lottie.LottieAnimationView
             android:id="@+id/iv_weather_icon"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:src="@drawable/ic_weather_sunny"
+            app:lottie_autoPlay="true"
+            app:lottie_loop="true"
+            app:lottie_rawRes="@raw/anim_sunny"
             android:contentDescription="Clima" />
 
         <!-- Ciudad y país -->

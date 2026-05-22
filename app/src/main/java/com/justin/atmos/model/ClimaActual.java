@@ -19,6 +19,8 @@ public class ClimaActual {
     @SerializedName("sys")
     public Sys sys;
 
+
+
     @SerializedName("dt")
     public long dt; // fecha actual en Unix timestamp
 
