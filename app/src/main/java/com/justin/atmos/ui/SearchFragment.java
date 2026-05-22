@@ -27,8 +27,6 @@ public class SearchFragment extends Fragment {
     private SearchAdapter adapter;
     private LinearLayout layoutEmpty;
     private RecyclerView rvResults;
-
-    // ── bandera para saber si la búsqueda fue iniciada en este fragment ──────
     private boolean busquedaIniciada = false;
 
     @Nullable
@@ -53,12 +51,15 @@ public class SearchFragment extends Fragment {
         rvResults.setLayoutManager(new LinearLayoutManager(requireContext()));
         rvResults.setAdapter(adapter);
 
-        // ── favorito: delegar en FavoritesManager (Integrante B) ────────────
-        // Cuando el Integrante B entregue FavoritesManager, reemplazar el Toast
-        // por: FavoritesManager.getInstance(requireContext()).guardarFavorito(clima)
+        // ── al tocar la tarjeta carga en Home y navega ───────────────────────
+        adapter.setOnItemClickListener(clima -> {
+            viewModel.cargarCiudadEnHome(clima);
+            navegarAHome();
+        });
+
+        // ── al tocar favorito ────────────────────────────────────────────────
         adapter.setOnFavoriteClickListener(clima -> {
-            // TODO: descomentar cuando FavoritesManager esté disponible (Integrante B)
-            // FavoritesManager.getInstance(requireContext()).guardarFavorito(clima);
+            // TODO: reemplazar por FavoritesManager cuando esté disponible (Integrante B)
             Toast.makeText(requireContext(),
                     clima.cityName + " guardado en favoritos",
                     Toast.LENGTH_SHORT).show();
@@ -83,18 +84,12 @@ public class SearchFragment extends Fragment {
             return false;
         });
 
-        // ── observar resultados del clima ────────────────────────────────────
-        viewModel.climaActual.observe(getViewLifecycleOwner(), clima -> {
+        // ── observar resultados de búsqueda (no toca climaActual) ────────────
+        viewModel.climaBusqueda.observe(getViewLifecycleOwner(), clima -> {
             if (clima != null && busquedaIniciada) {
-                // Mostrar resultado en el RecyclerView
                 adapter.setClima(clima);
                 mostrarResultados(true);
-
-                // Navegar a Home después de un momento para que el usuario
-                // vea el resultado antes de ser redirigido
-                // (Si prefieren ir directo, descomentar la siguiente línea
-                //  y comentar el bloque de mostrarResultados + adapter.setClima)
-                // navegarAHome();
+                busquedaIniciada = false;
             }
         });
 
@@ -102,13 +97,14 @@ public class SearchFragment extends Fragment {
         viewModel.error.observe(getViewLifecycleOwner(), error -> {
             if (busquedaIniciada) {
                 mostrarResultados(false);
+                busquedaIniciada = false;
                 Toast.makeText(requireContext(), error, Toast.LENGTH_SHORT).show();
             }
         });
 
-        // ── si ya hay datos previos de una búsqueda anterior, mostrarlos ─────
-        if (viewModel.climaActual.getValue() != null) {
-            adapter.setClima(viewModel.climaActual.getValue());
+        // ── si ya hay datos previos de búsqueda mostrarlos ───────────────────
+        if (viewModel.climaBusqueda.getValue() != null) {
+            adapter.setClima(viewModel.climaBusqueda.getValue());
             mostrarResultados(true);
         }
     }
@@ -119,13 +115,11 @@ public class SearchFragment extends Fragment {
         busquedaIniciada = false;
     }
 
-    // ── métodos privados ─────────────────────────────────────────────────────
+    // ── métodos privados ──────────────────────────────────────────────────────
 
     private void buscarCiudad(String ciudad) {
         adapter.setClima(null);
         mostrarResultados(false);
-        // La API busca por nombre parcial automáticamente,
-        // por ejemplo "Tor" puede encontrar "Torreón"
         viewModel.buscarClima(ciudad);
     }
 
