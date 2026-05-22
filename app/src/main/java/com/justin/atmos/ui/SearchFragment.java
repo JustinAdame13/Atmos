@@ -53,12 +53,14 @@ public class SearchFragment extends Fragment {
         rvResults.setLayoutManager(new LinearLayoutManager(requireContext()));
         rvResults.setAdapter(adapter);
 
-        // ── favorito: delegar en FavoritesManager (Integrante B) ────────────
-        // Cuando el Integrante B entregue FavoritesManager, reemplazar el Toast
-        // por: FavoritesManager.getInstance(requireContext()).guardarFavorito(clima)
+        // ── al tocar la tarjeta navega a Home ────────────────────────────────
+        adapter.setOnItemClickListener(clima -> {
+            navegarAHome();
+        });
+
+        // ── al tocar favorito ────────────────────────────────────────────────
         adapter.setOnFavoriteClickListener(clima -> {
-            // TODO: descomentar cuando FavoritesManager esté disponible (Integrante B)
-            // FavoritesManager.getInstance(requireContext()).guardarFavorito(clima);
+            // TODO: reemplazar por FavoritesManager cuando esté disponible (Integrante B)
             Toast.makeText(requireContext(),
                     clima.cityName + " guardado en favoritos",
                     Toast.LENGTH_SHORT).show();
@@ -86,15 +88,9 @@ public class SearchFragment extends Fragment {
         // ── observar resultados del clima ────────────────────────────────────
         viewModel.climaActual.observe(getViewLifecycleOwner(), clima -> {
             if (clima != null && busquedaIniciada) {
-                // Mostrar resultado en el RecyclerView
                 adapter.setClima(clima);
                 mostrarResultados(true);
-
-                // Navegar a Home después de un momento para que el usuario
-                // vea el resultado antes de ser redirigido
-                // (Si prefieren ir directo, descomentar la siguiente línea
-                //  y comentar el bloque de mostrarResultados + adapter.setClima)
-                // navegarAHome();
+                busquedaIniciada = false;
             }
         });
 
@@ -102,11 +98,12 @@ public class SearchFragment extends Fragment {
         viewModel.error.observe(getViewLifecycleOwner(), error -> {
             if (busquedaIniciada) {
                 mostrarResultados(false);
+                busquedaIniciada = false;
                 Toast.makeText(requireContext(), error, Toast.LENGTH_SHORT).show();
             }
         });
 
-        // ── si ya hay datos previos de una búsqueda anterior, mostrarlos ─────
+        // ── si ya hay datos previos mostrarlos sin navegar ───────────────────
         if (viewModel.climaActual.getValue() != null) {
             adapter.setClima(viewModel.climaActual.getValue());
             mostrarResultados(true);
