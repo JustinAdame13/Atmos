@@ -122,9 +122,10 @@ public class SearchFragment extends Fragment {
     // ── métodos privados ─────────────────────────────────────────────────────
 
     private void buscarCiudad(String ciudad) {
-        // Limpiar resultado anterior y mostrar estado vacío mientras carga
         adapter.setClima(null);
         mostrarResultados(false);
+        // La API busca por nombre parcial automáticamente,
+        // por ejemplo "Tor" puede encontrar "Torreón"
         viewModel.buscarClima(ciudad);
     }
 

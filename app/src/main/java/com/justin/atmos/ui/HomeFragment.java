@@ -7,7 +7,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
+import com.airbnb.lottie.LottieAnimationView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -233,34 +233,20 @@ public class HomeFragment extends Fragment {
         View celda = LayoutInflater.from(ctx)
                 .inflate(R.layout.item_hourly, containerHourly, false);
 
-        // Hora
         TextView tvHour = celda.findViewById(R.id.tv_hour);
         SimpleDateFormat sdfHora = new SimpleDateFormat("HH:mm", Locale.getDefault());
         tvHour.setText(sdfHora.format(new Date(item.dt * 1000L)));
 
-        // Temperatura
         TextView tvTemp = celda.findViewById(R.id.tv_hourly_temp);
         tvTemp.setText(String.format(Locale.getDefault(), "%.0f°", item.main.temp));
 
-        // Ícono (drawable estático)
-        ImageView ivIcon = celda.findViewById(R.id.iv_hourly_icon);
+        // Cambiar ImageView por LottieAnimationView
+        LottieAnimationView lottie = celda.findViewById(R.id.iv_hourly_icon);
         if (item.weather != null && !item.weather.isEmpty()) {
-            int iconRes = elegirIconoDrawable(
+            int animRes = elegirAnimacion(
                     item.weather.get(0).id, item.dt, sunrise, sunset);
-            ivIcon.setImageResource(iconRes);
-        }
-
-        // Margen en el primer ítem
-        if (containerHourly.getChildCount() == 0) {
-            LinearLayout.LayoutParams params =
-                    (LinearLayout.LayoutParams) celda.getLayoutParams();
-            if (params == null) {
-                params = new LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.WRAP_CONTENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT);
-            }
-            params.setMarginStart(0);
-            celda.setLayoutParams(params);
+            lottie.setAnimation(animRes);
+            lottie.playAnimation();
         }
 
         containerHourly.addView(celda);
