@@ -254,36 +254,56 @@ public class HomeFragment extends Fragment {
 
     // ── helpers para elegir animación / ícono ─────────────────────────────────
 
-    private int elegirAnimacion(int weatherId, long ahora, long sunrise, long sunset) {
-        boolean esDeNoche = ahora < sunrise || ahora > sunset;
 
-        if (weatherId >= 200 && weatherId <= 232) return R.raw.anim_storm;
-        if (weatherId >= 781 && weatherId <= 799) return R.raw.anim_thunder;
-        if ((weatherId >= 300 && weatherId <= 321) ||
-                (weatherId >= 500 && weatherId <= 531)) {
-            return esDeNoche ? R.raw.anim_rainy_night : R.raw.anim_rainy_day;
-        }
-        if (weatherId >= 600 && weatherId <= 780) {
-            return esDeNoche ? R.raw.anim_cloudy_night : R.raw.anim_cloudy_day;
-        }
-        return esDeNoche ? R.raw.anim_night : R.raw.anim_sunny;
-    }
 
     /**
      * Versión que devuelve un drawable (para las celdas horarias pequeñas).
      */
-    private int elegirIconoDrawable(int weatherId, long ahora, long sunrise, long sunset) {
+    private int elegirAnimacion(int weatherId, long ahora, long sunrise, long sunset) {
         boolean esDeNoche = ahora < sunrise || ahora > sunset;
 
-        if (weatherId >= 200 && weatherId <= 232) return R.drawable.ic_weather_storm;
-        if (weatherId >= 781 && weatherId <= 799) return R.drawable.ic_weather_thunder;
-        if ((weatherId >= 300 && weatherId <= 321) ||
-                (weatherId >= 500 && weatherId <= 531)) {
-            return R.drawable.ic_weather_rainy;
+        // Tormenta eléctrica: 200–232
+        if (weatherId >= 200 && weatherId <= 232) return R.raw.anim_storm;
+
+        // Llovizna: 300–321
+        if (weatherId >= 300 && weatherId <= 321) {
+            return esDeNoche ? R.raw.anim_rainy_night : R.raw.anim_rainy_day;
         }
-        if (weatherId >= 600 && weatherId <= 780) {
-            return esDeNoche ? R.drawable.ic_weather_cloudy_night : R.drawable.ic_weather_cloudy;
+
+        // Lluvia: 500–531
+        if (weatherId >= 500 && weatherId <= 531) {
+            return esDeNoche ? R.raw.anim_rainy_night : R.raw.anim_rainy_day;
         }
-        return esDeNoche ? R.drawable.ic_weather_night : R.drawable.ic_weather_sunny;
+
+        // Nieve: 600–622
+        if (weatherId >= 600 && weatherId <= 622) {
+            return esDeNoche ? R.raw.anim_cloudy_night : R.raw.anim_cloudy_day;
+        }
+
+        // Atmósfera (niebla, neblina, humo, etc.): 701–781
+        if (weatherId >= 701 && weatherId <= 781) {
+            return esDeNoche ? R.raw.anim_cloudy_night : R.raw.anim_cloudy_day;
+        }
+
+        // Tornado: 781–799
+        if (weatherId >= 781 && weatherId <= 799) return R.raw.anim_thunder;
+
+        // Cielo despejado: 800
+        if (weatherId == 800) {
+            return esDeNoche ? R.raw.anim_night : R.raw.anim_sunny;
+        }
+
+        // Algo nublado (pocas nubes): 801
+        if (weatherId == 801) {
+            return esDeNoche ? R.raw.anim_cloudy_night : R.raw.anim_cloudy_day;
+        }
+
+        // Nublado: 802–804
+        if (weatherId >= 802 && weatherId <= 804) {
+            return esDeNoche ? R.raw.anim_cloudy_night : R.raw.anim_cloudy_day;
+        }
+
+        // Fallback
+        return esDeNoche ? R.raw.anim_night : R.raw.anim_sunny;
     }
 }
