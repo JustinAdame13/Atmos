@@ -43,6 +43,7 @@ public class HomeFragment extends Fragment {
             tvDescription, tvFeelsLike, tvHumidity, tvWind;
     private LottieAnimationView lottieWeather;
     private LinearLayout containerHourly;
+    private android.widget.ProgressBar progressLoading;
 
     // ── launcher para pedir permiso ──────────────────────────────────────────
     private final ActivityResultLauncher<String[]> permisosLauncher =
@@ -81,6 +82,7 @@ public class HomeFragment extends Fragment {
         tvWind        = view.findViewById(R.id.tv_wind);
         lottieWeather = view.findViewById(R.id.lottie_weather);
         containerHourly = view.findViewById(R.id.container_hourly);
+        progressLoading = view.findViewById(R.id.progress_loading);
 
         // ── inicializar GPS ──────────────────────────────────────────────────
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity());
@@ -94,7 +96,12 @@ public class HomeFragment extends Fragment {
         // ── observar pronóstico para llenar las celdas horarias ──────────────
         viewModel.pronostico.observe(getViewLifecycleOwner(), this::actualizarHorario);
 
-        // ── observar errores ─────────────────────────────────────────────────
+        viewModel.cargando.observe(getViewLifecycleOwner(), cargando -> {
+            if (progressLoading != null) {
+                progressLoading.setVisibility(cargando ? View.VISIBLE : View.GONE);
+            }
+        });
+
         viewModel.error.observe(getViewLifecycleOwner(), error ->
                 Toast.makeText(requireContext(), error, Toast.LENGTH_SHORT).show());
 

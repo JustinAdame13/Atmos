@@ -18,7 +18,6 @@ public class WeatherRepository {
     public WeatherRepository() {
         service = RetrofitClient.getInstance().createService(WeatherService.class);
     }
-
     public void getClimaActual(String ciudad, String apiKey,
                                MutableLiveData<ClimaActual> climaData,
                                MutableLiveData<String> errorData) {
@@ -38,6 +37,30 @@ public class WeatherRepository {
                     @Override
                     public void onFailure(Call<ClimaActual> call, Throwable t) {
                         errorData.postValue("Sin conexión a internet");
+                    }
+                });
+    }
+
+    public void getClimaActualPorCoordenadas(double lat, double lon, String apiKey,
+                                             MutableLiveData<ClimaActual> climaData,
+                                             MutableLiveData<String> errorData,
+                                             MutableLiveData<Boolean> cargando) {
+        service.getClimaActualPorCoordenadas(lat, lon, apiKey, "metric", "es")
+                .enqueue(new Callback<ClimaActual>() {
+                    @Override
+                    public void onResponse(Call<ClimaActual> call, Response<ClimaActual> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            climaData.postValue(response.body());
+                        } else {
+                            errorData.postValue("No se pudo obtener el clima");
+                        }
+                        cargando.postValue(false);
+                    }
+
+                    @Override
+                    public void onFailure(Call<ClimaActual> call, Throwable t) {
+                        errorData.postValue("Sin conexión a internet");
+                        cargando.postValue(false);
                     }
                 });
     }

@@ -45,7 +45,7 @@ public class WeatherViewModel extends ViewModel {
     public void buscarClimaConCoordenadas(double lat, double lon) {
         cargando.setValue(true);
         repository.getClimaActualPorCoordenadas(lat, lon, BuildConfig.OPENWEATHER_API_KEY,
-                climaActual, error);
+                climaActual, error, cargando);
         repository.getPronosticoPorCoordenadas(lat, lon, BuildConfig.OPENWEATHER_API_KEY,
                 pronostico, error);
     }
