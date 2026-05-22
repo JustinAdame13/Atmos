@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.justin.atmos.Adapter.SearchAdapter;
 import com.justin.atmos.R;
 import com.justin.atmos.ViewModel.WeatherViewModel;
+import com.justin.atmos.storage.FavoritesManager;
 
 public class SearchFragment extends Fragment {
 
@@ -61,7 +62,9 @@ public class SearchFragment extends Fragment {
         adapter.setOnFavoriteClickListener(clima -> {
             // TODO: reemplazar por FavoritesManager cuando esté disponible (Integrante B)
             Toast.makeText(requireContext(),
-                    clima.cityName + " guardado en favoritos",
+                    clima.cityName + (new FavoritesManager(requireContext()).esFavorito(clima.cityName)
+                            ? " guardado en favoritos"
+                            : " eliminado de favoritos"),
                     Toast.LENGTH_SHORT).show();
         });
 

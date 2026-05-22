@@ -14,6 +14,7 @@ import com.justin.atmos.R;
 import com.justin.atmos.model.ClimaActual;
 
 import java.util.Locale;
+import com.justin.atmos.storage.FavoritesManager;
 
 public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.SearchViewHolder> {
 
@@ -58,7 +59,6 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.SearchView
             holder.tvWeatherDesc.setText(
                     desc.substring(0, 1).toUpperCase() + desc.substring(1));
 
-            // Elegir animación Lottie correcta
             int weatherId = climaActual.weather.get(0).id;
             int animRes = elegirAnimacion(
                     weatherId,
@@ -73,7 +73,24 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.SearchView
         holder.tvTemperature.setText(
                 String.format(Locale.getDefault(), "%.0f°C", climaActual.main.temp));
 
+        // ── FAVORITO: tint según estado ──────────────────────────────────────
+        FavoritesManager fm = new FavoritesManager(holder.itemView.getContext());
+        if (fm.esFavorito(climaActual.cityName)) {
+            holder.btnFavorite.setColorFilter(
+                    android.graphics.Color.parseColor("#FF1744"));
+        } else {
+            holder.btnFavorite.clearColorFilter();
+        }
+
         holder.btnFavorite.setOnClickListener(v -> {
+            if (fm.esFavorito(climaActual.cityName)) {
+                fm.eliminarFavorito(climaActual.cityName);
+                holder.btnFavorite.clearColorFilter();
+            } else {
+                fm.guardarFavorito(climaActual);
+                holder.btnFavorite.setColorFilter(
+                        android.graphics.Color.parseColor("#FF1744"));
+            }
             if (favoriteListener != null) {
                 favoriteListener.onFavoriteClick(climaActual);
             }
