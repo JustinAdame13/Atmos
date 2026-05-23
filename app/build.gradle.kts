@@ -8,7 +8,6 @@ android {
         version = release(36) {
             minorApiLevel = 1
         }
-
     }
 
     defaultConfig {
@@ -38,7 +37,12 @@ android {
                 "proguard-rules.pro"
             )
         }
+        debug {
+            applicationIdSuffix = ""
+            versionNameSuffix = ""
+        }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -46,6 +50,14 @@ android {
 
     buildFeatures {
         buildConfig = true
+    }
+}
+
+androidComponents {
+    onVariants { variant ->
+        variant.outputs.forEach { output ->
+            output.outputFileName.set("atmos.apk")
+        }
     }
 }
 
