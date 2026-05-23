@@ -198,35 +198,25 @@ public class HomeFragment extends Fragment {
 
         containerHourly.removeAllViews();
 
-        // Determinar el día actual (clave "yyyy-MM-dd")
-        SimpleDateFormat sdfDia = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-        String hoy = sdfDia.format(new Date());
+        // Hora actual en segundos UTC
+        long ahoraUtc = System.currentTimeMillis() / 1000L;
 
-        // Filtrar los registros de hoy; si no hay suficientes (tarde en el día),
-        // incluir también los primeros del día siguiente hasta completar 8.
         List<Pronostico.ForecastItem> todos = pronostico.list;
         int agregados = 0;
 
         for (Pronostico.ForecastItem item : todos) {
             if (agregados >= 8) break;
-            String diaItem = sdfDia.format(new Date(item.dt * 1000L));
-            if (diaItem.equals(hoy) || agregados > 0) {
-                // Si ya empezamos a agregar, continuamos hasta 8
-                agregarCeldaHoraria(item, pronostico.city.sunrise, pronostico.city.sunset);
-                agregados++;
-            } else if (diaItem.compareTo(hoy) >= 0) {
-                // Primera coincidencia con hoy o día posterior
+            if (item.dt >= ahoraUtc) {
                 agregarCeldaHoraria(item, pronostico.city.sunrise, pronostico.city.sunset);
                 agregados++;
             }
         }
 
-        // Si no encontramos ninguno del día actual, usar los primeros 8
         if (agregados == 0) {
             int max = Math.min(8, todos.size());
             for (int i = 0; i < max; i++) {
-                Pronostico.ForecastItem item = todos.get(i);
-                agregarCeldaHoraria(item, pronostico.city.sunrise, pronostico.city.sunset);
+                agregarCeldaHoraria(todos.get(i),
+                        pronostico.city.sunrise, pronostico.city.sunset);
             }
         }
     }
@@ -242,6 +232,7 @@ public class HomeFragment extends Fragment {
 
         TextView tvHour = celda.findViewById(R.id.tv_hour);
         SimpleDateFormat sdfHora = new SimpleDateFormat("HH:mm", Locale.getDefault());
+        sdfHora.setTimeZone(java.util.TimeZone.getDefault());
         tvHour.setText(sdfHora.format(new Date(item.dt * 1000L)));
 
         TextView tvTemp = celda.findViewById(R.id.tv_hourly_temp);
@@ -267,50 +258,38 @@ public class HomeFragment extends Fragment {
      * Versión que devuelve un drawable (para las celdas horarias pequeñas).
      */
     private int elegirAnimacion(int weatherId, long ahora, long sunrise, long sunset) {
-        boolean esDeNoche = ahora < sunrise || ahora > sunset;
+        // Usar hora local del dispositivo para determinar día/noche
+        java.util.Calendar calendar = java.util.Calendar.getInstance();
+        calendar.setTimeZone(java.util.TimeZone.getDefault());
+        calendar.setTimeInMillis(ahora * 1000L);
+        int hora = calendar.get(java.util.Calendar.HOUR_OF_DAY);
+        boolean esDeNoche = hora < 5 || hora >= 19;
 
-        // Tormenta eléctrica: 200–232
         if (weatherId >= 200 && weatherId <= 232) return R.raw.anim_storm;
 
-        // Llovizna: 300–321
-        if (weatherId >= 300 && weatherId <= 321) {
+        if (weatherId >= 300 && weatherId <= 321)
             return esDeNoche ? R.raw.anim_rainy_night : R.raw.anim_rainy_day;
-        }
 
-        // Lluvia: 500–531
-        if (weatherId >= 500 && weatherId <= 531) {
+        if (weatherId >= 500 && weatherId <= 531)
             return esDeNoche ? R.raw.anim_rainy_night : R.raw.anim_rainy_day;
-        }
 
-        // Nieve: 600–622
-        if (weatherId >= 600 && weatherId <= 622) {
+        if (weatherId >= 600 && weatherId <= 622)
             return esDeNoche ? R.raw.anim_cloudy_night : R.raw.anim_cloudy_day;
-        }
 
-        // Atmósfera (niebla, neblina, humo, etc.): 701–781
-        if (weatherId >= 701 && weatherId <= 781) {
+        if (weatherId >= 701 && weatherId <= 781)
             return esDeNoche ? R.raw.anim_cloudy_night : R.raw.anim_cloudy_day;
-        }
 
-        // Tornado: 781–799
         if (weatherId >= 781 && weatherId <= 799) return R.raw.anim_thunder;
 
-        // Cielo despejado: 800
-        if (weatherId == 800) {
+        if (weatherId == 800)
             return esDeNoche ? R.raw.anim_night : R.raw.anim_sunny;
-        }
 
-        // Algo nublado (pocas nubes): 801
-        if (weatherId == 801) {
+        if (weatherId == 801)
             return esDeNoche ? R.raw.anim_cloudy_night : R.raw.anim_cloudy_day;
-        }
 
-        // Nublado: 802–804
-        if (weatherId >= 802 && weatherId <= 804) {
+        if (weatherId >= 802 && weatherId <= 804)
             return esDeNoche ? R.raw.anim_cloudy_night : R.raw.anim_cloudy_day;
-        }
 
-        // Fallback
         return esDeNoche ? R.raw.anim_night : R.raw.anim_sunny;
     }
 }

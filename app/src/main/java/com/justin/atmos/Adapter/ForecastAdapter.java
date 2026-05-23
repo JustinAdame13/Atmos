@@ -136,50 +136,25 @@ public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.Foreca
 
     // ── misma lógica de animación que HomeFragment ───────
     private int elegirAnimacion(int weatherId, long ahora, long sunrise, long sunset) {
-        boolean esDeNoche = ahora < sunrise || ahora > sunset;
-
-        // Tormenta eléctrica: 200–232
+        // En el pronóstico de 5 días siempre mostrar animación de día
         if (weatherId >= 200 && weatherId <= 232) return R.raw.anim_storm;
 
-        // Llovizna: 300–321
-        if (weatherId >= 300 && weatherId <= 321) {
-            return esDeNoche ? R.raw.anim_rainy_night : R.raw.anim_rainy_day;
-        }
+        if (weatherId >= 300 && weatherId <= 321) return R.raw.anim_rainy_day;
 
-        // Lluvia: 500–531
-        if (weatherId >= 500 && weatherId <= 531) {
-            return esDeNoche ? R.raw.anim_rainy_night : R.raw.anim_rainy_day;
-        }
+        if (weatherId >= 500 && weatherId <= 531) return R.raw.anim_rainy_day;
 
-        // Nieve: 600–622
-        if (weatherId >= 600 && weatherId <= 622) {
-            return esDeNoche ? R.raw.anim_cloudy_night : R.raw.anim_cloudy_day;
-        }
+        if (weatherId >= 600 && weatherId <= 622) return R.raw.anim_cloudy_day;
 
-        // Atmósfera (niebla, neblina, humo, etc.): 701–781
-        if (weatherId >= 701 && weatherId <= 781) {
-            return esDeNoche ? R.raw.anim_cloudy_night : R.raw.anim_cloudy_day;
-        }
+        if (weatherId >= 701 && weatherId <= 781) return R.raw.anim_cloudy_day;
 
-        // Tornado: 781–799
         if (weatherId >= 781 && weatherId <= 799) return R.raw.anim_thunder;
 
-        // Cielo despejado: 800
-        if (weatherId == 800) {
-            return esDeNoche ? R.raw.anim_night : R.raw.anim_sunny;
-        }
+        if (weatherId == 800) return R.raw.anim_sunny;
 
-        // Algo nublado (pocas nubes): 801
-        if (weatherId == 801) {
-            return esDeNoche ? R.raw.anim_cloudy_night : R.raw.anim_cloudy_day;
-        }
+        if (weatherId == 801) return R.raw.anim_cloudy_day;
 
-        // Nublado: 802–804
-        if (weatherId >= 802 && weatherId <= 804) {
-            return esDeNoche ? R.raw.anim_cloudy_night : R.raw.anim_cloudy_day;
-        }
+        if (weatherId >= 802 && weatherId <= 804) return R.raw.anim_cloudy_day;
 
-        // Fallback
-        return esDeNoche ? R.raw.anim_night : R.raw.anim_sunny;
+        return R.raw.anim_sunny;
     }
 }
