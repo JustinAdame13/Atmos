@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:layout_weight="1"
+    android:gravity="center_horizontal"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/tv_wh_hora"
+        style="@style/Atmos.Widget.Text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:alpha="0.85"
+        android:text="15:00"
+        android:textSize="11sp" />
+
+    <ImageView
+        android:id="@+id/iv_wh_icono"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="4dp"
+        android:importantForAccessibility="no"
+        android:src="@drawable/ic_weather_sunny" />
+
+    <TextView
+        android:id="@+id/tv_wh_temp"
+        style="@style/Atmos.Widget.Text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="sans-serif-medium"
+        android:text="27°"
+        android:textSize="13sp" />
+</LinearLayout>

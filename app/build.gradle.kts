@@ -14,8 +14,8 @@ android {
         applicationId = "com.justin.atmos"
         minSdk = 26
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 2
+        versionName = "2.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -75,4 +75,6 @@ dependencies {
     implementation(libs.glide)
     implementation(libs.play.services.location)
     implementation(libs.lottie)
+    implementation(libs.swiperefreshlayout)
+    implementation(libs.recyclerview)
 }

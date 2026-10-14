@@ -1,8 +1,13 @@
 package com.justin.atmos.model;
 
 import com.google.gson.annotations.SerializedName;
+
 import java.util.List;
 
+/**
+ * Respuesta de OpenWeatherMap → /data/2.5/forecast
+ * Pronóstico de 5 días en bloques de 3 horas (40 elementos).
+ */
 public class Pronostico {
 
     @SerializedName("city")
@@ -16,6 +21,12 @@ public class Pronostico {
     public static class City {
         @SerializedName("name")
         public String name;
+
+        @SerializedName("country")
+        public String country;
+
+        @SerializedName("timezone")
+        public int timezone;
 
         @SerializedName("sunrise")
         public long sunrise;
@@ -37,8 +48,10 @@ public class Pronostico {
         @SerializedName("wind")
         public ClimaActual.Wind wind;
 
-        @SerializedName("dt_txt")
-        public String dtTxt; // fecha en texto, ej: "2026-05-15 12:00:00"
-    }
+        @SerializedName("pop")
+        public double pop; // probabilidad de precipitación 0..1
 
+        @SerializedName("dt_txt")
+        public String dtTxt; // ej: "2026-05-15 12:00:00" (UTC)
+    }
 }

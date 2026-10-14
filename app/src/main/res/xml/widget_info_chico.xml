@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Configuración del widget chico (2x2).
+    updatePeriodMillis = 0 porque las actualizaciones las programa JobScheduler (cada 30 min).
+    configure = pantalla para elegir la ciudad al colocar el widget.
+-->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:configure="com.justin.atmos.widget.WidgetConfigActivity"
+    android:description="@string/widget_small_desc"
+    android:initialLayout="@layout/widget_chico"
+    android:minWidth="110dp"
+    android:minHeight="110dp"
+    android:minResizeWidth="110dp"
+    android:minResizeHeight="110dp"
+    android:previewImage="@mipmap/ic_launcher"
+    android:previewLayout="@layout/widget_chico"
+    android:resizeMode="horizontal|vertical"
+    android:targetCellWidth="2"
+    android:targetCellHeight="2"
+    android:updatePeriodMillis="0"
+    android:widgetCategory="home_screen"
+    android:widgetFeatures="reconfigurable" />

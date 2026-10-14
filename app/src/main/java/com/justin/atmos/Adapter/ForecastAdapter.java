@@ -1,119 +1,111 @@
 package com.justin.atmos.Adapter;
 
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.airbnb.lottie.LottieAnimationView;
 import com.justin.atmos.R;
-import com.justin.atmos.model.Pronostico;
+import com.justin.atmos.model.ClimaCombinado;
+import com.justin.atmos.model.CondicionClima;
+import com.justin.atmos.ui.views.BarraRangoView;
+import com.justin.atmos.utils.Formato;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.LinkedHashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
+import java.util.Set;
 
-public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.ForecastViewHolder> {
+/**
+ * Lista del pronóstico de hasta 16 días. Cada fila se puede tocar para
+ * desplegar el detalle con lo que dijo cada fuente.
+ *
+ * El método estático llenarFila() también lo usa HomeFragment para su
+ * lista de 7 días, así no repetimos código.
+ */
+public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.ViewHolder> {
 
-    private List<DiaResumen> dias = new ArrayList<>();
-    private long sunrise;
-    private long sunset;
+    private final List<ClimaCombinado.Dia> dias = new ArrayList<>();
+    private final Set<Integer> expandidos = new HashSet<>();
+    private int desfase;
+    private double minGlobal, maxGlobal;
+    private Double tempActual;
 
-    // ── modelo interno ───────────────────────────────────
-    public static class DiaResumen {
-        public String dia;
-        public double tempMax;
-        public double tempMin;
-        public int weatherId;
-        public long dt;
-    }
-
-    // ── actualizar datos ─────────────────────────────────
-    public void setDatos(Pronostico pronostico) {
-        this.sunrise = pronostico.city.sunrise;
-        this.sunset = pronostico.city.sunset;
-        this.dias = agruparPorDia(pronostico.list);
+    public void setDatos(ClimaCombinado clima) {
+        dias.clear();
+        dias.addAll(clima.dias);
+        desfase = clima.desfaseUtc;
+        tempActual = clima.actual.temperatura;
+        double[] r = rangoGlobal(dias);
+        minGlobal = r[0];
+        maxGlobal = r[1];
         notifyDataSetChanged();
     }
 
-    // ── agrupar los 40 registros por día ─────────────────
-    private List<DiaResumen> agruparPorDia(List<Pronostico.ForecastItem> items) {
-        LinkedHashMap<String, List<Pronostico.ForecastItem>> mapa = new LinkedHashMap<>();
-
-        SimpleDateFormat sdfKey = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-
-        for (Pronostico.ForecastItem item : items) {
-            String key = sdfKey.format(new Date(item.dt * 1000L));
-            if (!mapa.containsKey(key)) {
-                mapa.put(key, new ArrayList<>());
-            }
-            mapa.get(key).add(item);
-        }
-
-        List<DiaResumen> resultado = new ArrayList<>();
-
-        for (Map.Entry<String, List<Pronostico.ForecastItem>> entry : mapa.entrySet()) {
-            List<Pronostico.ForecastItem> grupo = entry.getValue();
-
-            DiaResumen resumen = new DiaResumen();
-
-            // nombre del día
-            SimpleDateFormat sdfDia = new SimpleDateFormat("EEEE", new Locale("es"));
-            resumen.dia = sdfDia.format(new Date(grupo.get(0).dt * 1000L));
-            resumen.dia = resumen.dia.substring(0, 1).toUpperCase() + resumen.dia.substring(1);
-
-            // max y min
-            resumen.tempMax = Double.MIN_VALUE;
-            resumen.tempMin = Double.MAX_VALUE;
-            for (Pronostico.ForecastItem item : grupo) {
-                if (item.main.temp > resumen.tempMax) resumen.tempMax = item.main.temp;
-                if (item.main.temp < resumen.tempMin) resumen.tempMin = item.main.temp;
-            }
-
-            // weather id y dt del mediodía si existe, si no el primero
-            Pronostico.ForecastItem representativo = grupo.get(0);
-            for (Pronostico.ForecastItem item : grupo) {
-                if (item.dtTxt.contains("12:00:00")) {
-                    representativo = item;
-                    break;
-                }
-            }
-            resumen.weatherId = representativo.weather.get(0).id;
-            resumen.dt = representativo.dt;
-
-            resultado.add(resumen);
-        }
-
-        return resultado;
-    }
-
-    // ── RecyclerView obligatorios ────────────────────────
     @NonNull
     @Override
-    public ForecastViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_forecast, parent, false);
-        return new ForecastViewHolder(view);
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_forecast, parent, false);
+        return new ViewHolder(v);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ForecastViewHolder holder, int position) {
-        DiaResumen dia = dias.get(position);
+    public void onBindViewHolder(@NonNull ViewHolder h, int position) {
+        ClimaCombinado.Dia d = dias.get(position);
+        Context ctx = h.itemView.getContext();
+        llenarFila(h.itemView, d, desfase, minGlobal, maxGlobal, position == 0 ? tempActual : null);
 
-        holder.tvDay.setText(dia.dia);
-        holder.tvTemps.setText(String.format(Locale.getDefault(),
-                "%.0f° / %.0f°", dia.tempMax, dia.tempMin));
+        boolean abierto = expandidos.contains(position);
+        h.ivExpandir.setVisibility(View.VISIBLE);
+        h.ivExpandir.setRotation(abierto ? 180 : 0);
+        h.layoutDetalle.setVisibility(abierto ? View.VISIBLE : View.GONE);
+        if (abierto) llenarDetalle(ctx, h, d);
 
-        int animRes = elegirAnimacion(dia.weatherId, dia.dt, sunrise, sunset);
-        holder.lottie.setAnimation(animRes);
-        holder.lottie.playAnimation();
+        h.itemView.setOnClickListener(v -> {
+            int pos = h.getBindingAdapterPosition();
+            if (pos == RecyclerView.NO_POSITION) return;
+            if (!expandidos.remove(pos)) expandidos.add(pos);
+            notifyItemChanged(pos);
+        });
+    }
+
+    private void llenarDetalle(Context ctx, ViewHolder h, ClimaCombinado.Dia d) {
+        h.tvDescripcion.setText(CondicionClima.descripcionWmo(d.codigoWmo));
+
+        h.tvFuenteOm.setText(String.format(Locale.getDefault(), "● Open-Meteo:  %s / %s  ·  lluvia %s",
+                Formato.temp(ctx, d.maxOpenMeteo), Formato.temp(ctx, d.minOpenMeteo),
+                d.probLluviaOpenMeteo != null ? d.probLluviaOpenMeteo + "%" : "—"));
+        h.tvFuenteOm.setTextColor(ctx.getColor(R.color.fuente_openmeteo));
+
+        if (d.tieneDosFuentes()) {
+            h.tvFuenteOw.setVisibility(View.VISIBLE);
+            h.tvFuenteOw.setText(String.format(Locale.getDefault(), "● OpenWeather:  %s / %s  ·  lluvia %s",
+                    Formato.temp(ctx, d.maxOpenWeather), Formato.temp(ctx, d.minOpenWeather),
+                    d.probLluviaOpenWeather != null ? d.probLluviaOpenWeather + "%" : "—"));
+            h.tvFuenteOw.setTextColor(ctx.getColor(R.color.fuente_openweather));
+        } else {
+            h.tvFuenteOw.setVisibility(View.VISIBLE);
+            h.tvFuenteOw.setText("● OpenWeather: sin datos para este día (solo pronostica 5 días)");
+            h.tvFuenteOw.setTextColor(ctx.getColor(R.color.text_on_glass_tertiary));
+        }
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("Rango probable: máx ").append(Formato.rango(ctx, d.maxBaja(), d.maxAlta()))
+                .append(" · mín ").append(Formato.rango(ctx, d.minBaja(), d.minAlta()));
+        if (d.uvMax != null) sb.append("\nUV máx ").append(Math.round(d.uvMax)).append(" (").append(Formato.nivelUv(d.uvMax)).append(")");
+        if (d.vientoMaxKmh != null) sb.append("  ·  Viento máx ").append(Formato.viento(ctx, d.vientoMaxKmh));
+        if (d.lluviaMm != null && d.lluviaMm > 0) sb.append("\nLluvia acumulada ").append(String.format(Locale.US, "%.1f mm", d.lluviaMm));
+        if (d.amanecer > 0) {
+            sb.append("\nAmanecer ").append(Formato.hora(ctx, d.amanecer, desfase))
+                    .append("  ·  Atardecer ").append(Formato.hora(ctx, d.atardecer, desfase));
+        }
+        h.tvExtra.setText(sb.toString());
     }
 
     @Override
@@ -121,40 +113,53 @@ public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.Foreca
         return dias.size();
     }
 
-    // ── ViewHolder ───────────────────────────────────────
-    static class ForecastViewHolder extends RecyclerView.ViewHolder {
-        TextView tvDay, tvTemps;
-        LottieAnimationView lottie;
+    // ═════════════════════════════════════════════════════════════════════════
+    //  Ayudantes compartidos con HomeFragment
+    // ═════════════════════════════════════════════════════════════════════════
 
-        ForecastViewHolder(@NonNull View itemView) {
-            super(itemView);
-            tvDay = itemView.findViewById(R.id.tv_day);
-            tvTemps = itemView.findViewById(R.id.tv_temps);
-            lottie = itemView.findViewById(R.id.lottie_item);
-        }
+    /** Llena una vista inflada de item_forecast.xml con los datos de un día. */
+    public static void llenarFila(View fila, ClimaCombinado.Dia d, int desfase,
+                                  double minGlobal, double maxGlobal, Double tempActual) {
+        Context ctx = fila.getContext();
+        ((TextView) fila.findViewById(R.id.tv_dia)).setText(Formato.nombreDia(d.fecha, desfase));
+        ((TextView) fila.findViewById(R.id.tv_fecha)).setText(Formato.fechaCorta(d.fecha, desfase));
+        ((ImageView) fila.findViewById(R.id.iv_icono)).setImageResource(d.condicion.icono(true));
+
+        TextView tvProb = fila.findViewById(R.id.tv_prob_lluvia);
+        int prob = d.probLluvia();
+        tvProb.setText(prob >= 10 ? prob + "%" : "");
+
+        ((TextView) fila.findViewById(R.id.tv_min)).setText(Formato.temp(ctx, d.min()));
+        ((TextView) fila.findViewById(R.id.tv_max)).setText(Formato.temp(ctx, d.max()));
+
+        BarraRangoView barra = fila.findViewById(R.id.barra_rango);
+        barra.setRango(minGlobal, maxGlobal, d.min(), d.max(), d.minBaja(), d.maxAlta(), tempActual);
     }
 
-    // ── misma lógica de animación que HomeFragment ───────
-    private int elegirAnimacion(int weatherId, long ahora, long sunrise, long sunset) {
-        // En el pronóstico de 5 días siempre mostrar animación de día
-        if (weatherId >= 200 && weatherId <= 232) return R.raw.anim_storm;
+    /** {mínimo, máximo} de todos los días (incluyendo la diferencia entre fuentes). */
+    public static double[] rangoGlobal(List<ClimaCombinado.Dia> dias) {
+        double min = Double.MAX_VALUE, max = -Double.MAX_VALUE;
+        for (ClimaCombinado.Dia d : dias) {
+            min = Math.min(min, d.minBaja());
+            max = Math.max(max, d.maxAlta());
+        }
+        if (dias.isEmpty()) { min = 0; max = 1; }
+        return new double[]{min, max};
+    }
 
-        if (weatherId >= 300 && weatherId <= 321) return R.raw.anim_rainy_day;
+    static class ViewHolder extends RecyclerView.ViewHolder {
+        final ImageView ivExpandir;
+        final View layoutDetalle;
+        final TextView tvDescripcion, tvFuenteOm, tvFuenteOw, tvExtra;
 
-        if (weatherId >= 500 && weatherId <= 531) return R.raw.anim_rainy_day;
-
-        if (weatherId >= 600 && weatherId <= 622) return R.raw.anim_cloudy_day;
-
-        if (weatherId >= 701 && weatherId <= 781) return R.raw.anim_cloudy_day;
-
-        if (weatherId >= 781 && weatherId <= 799) return R.raw.anim_thunder;
-
-        if (weatherId == 800) return R.raw.anim_sunny;
-
-        if (weatherId == 801) return R.raw.anim_cloudy_day;
-
-        if (weatherId >= 802 && weatherId <= 804) return R.raw.anim_cloudy_day;
-
-        return R.raw.anim_sunny;
+        ViewHolder(@NonNull View v) {
+            super(v);
+            ivExpandir = v.findViewById(R.id.iv_expandir);
+            layoutDetalle = v.findViewById(R.id.layout_detalle);
+            tvDescripcion = v.findViewById(R.id.tv_descripcion_dia);
+            tvFuenteOm = v.findViewById(R.id.tv_fuente_om);
+            tvFuenteOw = v.findViewById(R.id.tv_fuente_ow);
+            tvExtra = v.findViewById(R.id.tv_extra_dia);
+        }
     }
 }

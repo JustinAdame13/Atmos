@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Widget 4x4: encabezado, actual, horas y 5 días -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_widget_clear_day"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <!-- Encabezado -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/tv_w_ciudad"
+            style="@style/Atmos.Widget.Text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:ellipsize="end"
+            android:fontFamily="sans-serif-medium"
+            android:maxLines="1"
+            android:text="Torreón"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/tv_w_actualizado"
+            style="@style/Atmos.Widget.Text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:alpha="0.7"
+            android:text=""
+            android:textSize="11sp" />
+
+        <ImageView
+            android:id="@+id/iv_w_refrescar"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:alpha="0.8"
+            android:contentDescription="Actualizar"
+            android:src="@drawable/ic_refresh" />
+    </LinearLayout>
+
+    <!-- Actual -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/tv_w_temp"
+            style="@style/Atmos.Widget.Text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-light"
+            android:includeFontPadding="false"
+            android:text="28°"
+            android:textSize="52sp" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tv_w_desc"
+                style="@style/Atmos.Widget.Text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:text="Despejado"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/tv_w_maxmin"
+                style="@style/Atmos.Widget.Text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:alpha="0.85"
+                android:text="↑31°  ↓18°"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/tv_w_sensacion"
+                style="@style/Atmos.Widget.Text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:alpha="0.75"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:text=""
+                android:textSize="11sp" />
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/iv_w_icono"
+            android:layout_width="52dp"
+            android:layout_height="52dp"
+            android:importantForAccessibility="no"
+            android:src="@drawable/ic_weather_sunny" />
+    </LinearLayout>
+
+    <!-- Horas -->
+    <LinearLayout
+        android:id="@+id/contenedor_w_horas"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/bg_widget_item"
+        android:orientation="horizontal"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp" />
+
+    <!-- Días -->
+    <LinearLayout
+        android:id="@+id/contenedor_w_dias"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="8dp"
+        android:layout_weight="1"
+        android:orientation="vertical" />
+</LinearLayout>

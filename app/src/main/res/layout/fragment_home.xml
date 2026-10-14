@@ -1,223 +1,661 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/bg_dark"
-    android:fillViewport="true">
+    android:layout_height="match_parent">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <!-- Deslizar hacia abajo para actualizar -->
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipe_refresh"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingHorizontal="20dp"
-        android:paddingBottom="24dp">
+        android:layout_height="match_parent">
 
-        <!-- Ciudad y fecha -->
-        <TextView
-            android:id="@+id/tv_city_name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
-            android:text="Cargando..."
-            android:textColor="@color/text_primary"
-            android:textSize="28sp"
-            android:textStyle="bold"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <TextView
-            android:id="@+id/tv_date"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="--"
-            android:textColor="@color/text_secondary"
-            android:textSize="14sp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tv_city_name" />
-
-        <!-- Botón de ubicación -->
-        <!-- Indicador de carga -->
-        <ProgressBar
-            android:id="@+id/progress_loading"
-            android:layout_width="28dp"
-            android:layout_height="28dp"
-            android:visibility="gone"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@id/tv_city_name"
-            app:layout_constraintBottom_toBottomOf="@id/tv_city_name" />
-
-        <!-- Animación Lottie del clima -->
-        <com.airbnb.lottie.LottieAnimationView
-            android:id="@+id/lottie_weather"
-            android:layout_width="180dp"
-            android:layout_height="180dp"
-            android:layout_marginTop="16dp"
-            app:lottie_autoPlay="true"
-            app:lottie_loop="true"
-            app:lottie_rawRes="@raw/anim_sunny"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tv_date" />
-
-        <!-- Temperatura principal -->
-        <TextView
-            android:id="@+id/tv_temperature"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="--°C"
-            android:textColor="@color/text_primary"
-            android:textSize="72sp"
-            android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/lottie_weather" />
-
-        <!-- Descripción del clima -->
-        <TextView
-            android:id="@+id/tv_description"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="--"
-            android:textColor="@color/accent_blue"
-            android:textSize="18sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tv_temperature" />
-
-        <!-- Tarjeta de detalles -->
-        <androidx.cardview.widget.CardView
-            android:id="@+id/card_details"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
-            app:cardBackgroundColor="@color/bg_card"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="0dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tv_description">
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/scroll_home"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:paddingBottom="112dp">
 
             <LinearLayout
+                android:id="@+id/contenido_home"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:padding="20dp">
+                android:orientation="vertical"
+                android:paddingStart="16dp"
+                android:paddingTop="8dp"
+                android:paddingEnd="16dp">
 
-                <!-- Sensación térmica -->
+                <!-- ═════════ Encabezado: ciudad + acciones ═════════ -->
                 <LinearLayout
-                    android:layout_width="0dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="center"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:id="@+id/iv_tipo_ubicacion"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/ic_location"
+                        app:tint="@color/text_on_glass" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/tv_city_name"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:ellipsize="end"
+                            android:fontFamily="sans-serif-medium"
+                            android:maxLines="1"
+                            android:text="Atmos"
+                            android:textColor="@color/text_on_glass"
+                            android:textSize="22sp" />
+
+                        <TextView
+                            android:id="@+id/tv_region"
+                            style="@style/Atmos.TextSecondary"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:maxLines="1"
+                            android:text="" />
+                    </LinearLayout>
+
+                    <ImageButton
+                        android:id="@+id/btn_favorito"
+                        android:layout_width="44dp"
+                        android:layout_height="44dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:contentDescription="Agregar a favoritos"
+                        android:src="@drawable/ic_star_outline"
+                        app:tint="@color/text_on_glass" />
+
+                    <ImageButton
+                        android:id="@+id/btn_ajustes"
+                        android:layout_width="44dp"
+                        android:layout_height="44dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:contentDescription="Ajustes"
+                        android:src="@drawable/ic_settings"
+                        app:tint="@color/text_on_glass" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/tv_date"
+                    style="@style/Atmos.TextSecondary"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="28dp"
+                    android:text="" />
+
+                <!-- ═════════ Héroe: animación + temperatura ═════════ -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:gravity="center_horizontal"
                     android:orientation="vertical">
 
+                    <com.airbnb.lottie.LottieAnimationView
+                        android:id="@+id/lottie_weather"
+                        android:layout_width="150dp"
+                        android:layout_height="150dp"
+                        app:lottie_autoPlay="true"
+                        app:lottie_loop="true"
+                        app:lottie_rawRes="@raw/anim_sunny" />
+
                     <TextView
+                        android:id="@+id/tv_temperature"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Sensación"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="12sp" />
+                        android:layout_marginTop="-12dp"
+                        android:fontFamily="sans-serif-thin"
+                        android:includeFontPadding="false"
+                        android:text="--°"
+                        android:textColor="@color/text_on_glass"
+                        android:textSize="104sp" />
+
+                    <TextView
+                        android:id="@+id/tv_description"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="sans-serif-medium"
+                        android:text=""
+                        android:textColor="@color/text_on_glass"
+                        android:textSize="20sp" />
+
+                    <TextView
+                        android:id="@+id/tv_max_min"
+                        style="@style/Atmos.TextPrimary"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="" />
 
                     <TextView
                         android:id="@+id/tv_feels_like"
+                        style="@style/Atmos.TextSecondary"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="--°C"
-                        android:textColor="@color/text_primary"
-                        android:textSize="18sp"
-                        android:textStyle="bold" />
+                        android:layout_marginTop="2dp"
+                        android:text="" />
+
+                    <TextView
+                        android:id="@+id/tv_actualizado"
+                        style="@style/Atmos.TextTertiary"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:text="" />
                 </LinearLayout>
 
-                <!-- Humedad -->
+                <!-- ═════════ Alerta de lluvia (oculta si no aplica) ═════════ -->
                 <LinearLayout
-                    android:layout_width="0dp"
+                    android:id="@+id/card_alerta"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="center"
+                    android:layout_marginTop="20dp"
+                    android:background="@drawable/bg_alerta"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="14dp"
+                    android:visibility="gone"
+                    tools:visibility="visible">
+
+                    <ImageView
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/ic_drop"
+                        app:tint="@color/lluvia" />
+
+                    <TextView
+                        android:id="@+id/tv_alerta"
+                        style="@style/Atmos.TextPrimary"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:layout_weight="1"
+                        android:text=""
+                        android:textSize="14sp" />
+                </LinearLayout>
+
+                <!-- ═════════ Comparativa de fuentes ═════════ -->
+                <LinearLayout
+                    android:id="@+id/card_fuentes"
+                    style="@style/Atmos.Card"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            style="@style/Atmos.SectionTitle"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Dos fuentes, un pronóstico" />
+
+                        <TextView
+                            android:id="@+id/tv_confianza"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/bg_glass_pill"
+                            android:fontFamily="sans-serif-medium"
+                            android:paddingStart="10dp"
+                            android:paddingTop="4dp"
+                            android:paddingEnd="10dp"
+                            android:paddingBottom="4dp"
+                            android:text="Coincidencia alta"
+                            android:textColor="@color/confianza_alta"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:orientation="horizontal">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                style="@style/Atmos.TextSecondary"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawablePadding="6dp"
+                                android:text="● Open-Meteo"
+                                android:textColor="@color/fuente_openmeteo" />
+
+                            <TextView
+                                android:id="@+id/tv_temp_om"
+                                style="@style/Atmos.TileValue"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="--" />
+                        </LinearLayout>
+
+                        <View
+                            android:layout_width="1dp"
+                            android:layout_height="match_parent"
+                            android:layout_marginStart="8dp"
+                            android:layout_marginEnd="16dp"
+                            android:background="@color/divider_glass" />
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                style="@style/Atmos.TextSecondary"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="● OpenWeather"
+                                android:textColor="@color/fuente_openweather" />
+
+                            <TextView
+                                android:id="@+id/tv_temp_ow"
+                                style="@style/Atmos.TileValue"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="--" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/tv_fuentes_detalle"
+                        style="@style/Atmos.TextSecondary"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:lineSpacingExtra="2dp"
+                        android:text="" />
+                </LinearLayout>
+
+                <!-- ═════════ Próximas horas (gráfica) ═════════ -->
+                <LinearLayout
+                    style="@style/Atmos.Card"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:orientation="vertical"
+                    android:paddingStart="0dp"
+                    android:paddingEnd="0dp">
+
+                    <TextView
+                        style="@style/Atmos.SectionTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:drawableStart="@drawable/ic_schedule"
+                        android:drawableTint="@color/text_on_glass_secondary"
+                        android:text="Próximas 24 horas" />
+
+                    <HorizontalScrollView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:clipToPadding="false"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp"
+                        android:scrollbars="none">
+
+                        <com.justin.atmos.ui.views.GraficaTemperaturaView
+                            android:id="@+id/grafica_horas"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+                    </HorizontalScrollView>
+
+                    <TextView
+                        android:id="@+id/tv_leyenda"
+                        style="@style/Atmos.TextTertiary"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginTop="4dp"
+                        android:text="━ Open-Meteo (cada hora)   ┅ OpenWeather (cada 3 h)" />
+                </LinearLayout>
+
+                <!-- ═════════ Próximos días ═════════ -->
+                <LinearLayout
+                    style="@style/Atmos.Card"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
                     android:orientation="vertical">
 
                     <TextView
+                        style="@style/Atmos.SectionTitle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Humedad"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="12sp" />
+                        android:drawableStart="@drawable/ic_calendar"
+                        android:drawableTint="@color/text_on_glass_secondary"
+                        android:text="Próximos 7 días" />
 
-                    <TextView
-                        android:id="@+id/tv_humidity"
-                        android:layout_width="wrap_content"
+                    <LinearLayout
+                        android:id="@+id/container_dias"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:text="--%"
-                        android:textColor="@color/text_primary"
-                        android:textSize="18sp"
-                        android:textStyle="bold" />
+                        android:orientation="vertical" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_ver_pronostico"
+                        style="@style/Widget.Material3.Button.TextButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Ver pronóstico de 16 días"
+                        android:textColor="@color/text_on_glass" />
                 </LinearLayout>
 
-                <!-- Viento -->
-                <LinearLayout
-                    android:layout_width="0dp"
+                <!-- ═════════ Detalles ═════════ -->
+                <TextView
+                    style="@style/Atmos.SectionTitle"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="center"
+                    android:layout_marginStart="4dp"
+                    android:layout_marginTop="24dp"
+                    android:layout_marginBottom="8dp"
+                    android:text="Detalles" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <include
+                        android:id="@+id/tile_uv"
+                        layout="@layout/item_detalle" />
+
+                    <Space
+                        android:layout_width="12dp"
+                        android:layout_height="1dp" />
+
+                    <include
+                        android:id="@+id/tile_viento"
+                        layout="@layout/item_detalle" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:orientation="horizontal">
+
+                    <include
+                        android:id="@+id/tile_humedad"
+                        layout="@layout/item_detalle" />
+
+                    <Space
+                        android:layout_width="12dp"
+                        android:layout_height="1dp" />
+
+                    <include
+                        android:id="@+id/tile_lluvia"
+                        layout="@layout/item_detalle" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:orientation="horizontal">
+
+                    <include
+                        android:id="@+id/tile_presion"
+                        layout="@layout/item_detalle" />
+
+                    <Space
+                        android:layout_width="12dp"
+                        android:layout_height="1dp" />
+
+                    <include
+                        android:id="@+id/tile_visibilidad"
+                        layout="@layout/item_detalle" />
+                </LinearLayout>
+
+                <!-- ═════════ Sol ═════════ -->
+                <LinearLayout
+                    style="@style/Atmos.Card"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
                     android:orientation="vertical">
 
                     <TextView
+                        style="@style/Atmos.SectionTitle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Viento"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="12sp" />
+                        android:drawableStart="@drawable/ic_uv"
+                        android:drawableTint="@color/text_on_glass_secondary"
+                        android:text="Amanecer y atardecer" />
+
+                    <com.justin.atmos.ui.views.ArcoSolView
+                        android:id="@+id/arco_sol"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="24dp"
+                        android:layout_marginTop="12dp"
+                        android:layout_marginEnd="24dp" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                style="@style/Atmos.TextTertiary"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Amanecer" />
+
+                            <TextView
+                                android:id="@+id/tv_amanecer"
+                                style="@style/Atmos.TextPrimary"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textSize="18sp"
+                                android:text="--" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="end"
+                            android:orientation="vertical">
+
+                            <TextView
+                                style="@style/Atmos.TextTertiary"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Atardecer" />
+
+                            <TextView
+                                android:id="@+id/tv_atardecer"
+                                style="@style/Atmos.TextPrimary"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textSize="18sp"
+                                android:text="--" />
+                        </LinearLayout>
+                    </LinearLayout>
 
                     <TextView
-                        android:id="@+id/tv_wind"
-                        android:layout_width="wrap_content"
+                        android:id="@+id/tv_duracion_dia"
+                        style="@style/Atmos.TextSecondary"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="-- km/h"
-                        android:textColor="@color/text_primary"
-                        android:textSize="18sp"
-                        android:textStyle="bold" />
+                        android:layout_marginTop="8dp"
+                        android:gravity="center"
+                        android:text="" />
                 </LinearLayout>
 
+                <!-- ═════════ Calidad del aire ═════════ -->
+                <LinearLayout
+                    android:id="@+id/card_aire"
+                    style="@style/Atmos.Card"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/Atmos.SectionTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:drawableStart="@drawable/ic_air"
+                        android:drawableTint="@color/text_on_glass_secondary"
+                        android:text="Calidad del aire" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:gravity="bottom"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/tv_aqi_valor"
+                            style="@style/Atmos.TileValue"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="--"
+                            android:textSize="40sp" />
+
+                        <TextView
+                            android:id="@+id/tv_aqi_nivel"
+                            style="@style/Atmos.TextPrimary"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="12dp"
+                            android:layout_marginBottom="8dp"
+                            android:fontFamily="sans-serif-medium"
+                            android:text="" />
+                    </LinearLayout>
+
+                    <!-- Escala de colores con un punto que marca el valor actual -->
+                    <FrameLayout
+                        android:id="@+id/escala_aqi"
+                        android:layout_width="match_parent"
+                        android:layout_height="12dp"
+                        android:layout_marginTop="8dp">
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="6dp"
+                            android:layout_gravity="center_vertical"
+                            android:background="@drawable/bg_aqi_escala" />
+
+                        <View
+                            android:id="@+id/punto_aqi"
+                            android:layout_width="12dp"
+                            android:layout_height="12dp"
+                            android:background="@drawable/bg_dot" />
+                    </FrameLayout>
+
+                    <TextView
+                        android:id="@+id/tv_contaminantes"
+                        style="@style/Atmos.TextSecondary"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:text="" />
+
+                    <TextView
+                        android:id="@+id/tv_aqi_owm"
+                        style="@style/Atmos.TextTertiary"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="" />
+                </LinearLayout>
+
+                <TextView
+                    style="@style/Atmos.TextTertiary"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:gravity="center"
+                    android:text="@string/creditos_datos" />
             </LinearLayout>
-        </androidx.cardview.widget.CardView>
+        </androidx.core.widget.NestedScrollView>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
-        <!-- Título mini pronóstico -->
+    <!-- ═════════ Estado vacío: sin permiso de ubicación y sin ciudad elegida ═════════ -->
+    <LinearLayout
+        android:id="@+id/estado_vacio"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="32dp"
+        android:visibility="gone">
+
+        <com.airbnb.lottie.LottieAnimationView
+            android:layout_width="160dp"
+            android:layout_height="160dp"
+            app:lottie_autoPlay="true"
+            app:lottie_loop="true"
+            app:lottie_rawRes="@raw/anim_cloudy_day" />
+
         <TextView
-            android:id="@+id/tv_today_label"
+            style="@style/Atmos.ScreenTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="28dp"
-            android:text="Hoy"
-            android:textColor="@color/text_primary"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/card_details" />
+            android:gravity="center"
+            android:text="Bienvenido a Atmos"
+            android:textSize="24sp" />
 
-        <!-- Mini pronóstico horizontal -->
-        <HorizontalScrollView
-            android:id="@+id/scroll_hourly"
-            android:layout_width="0dp"
+        <TextView
+            style="@style/Atmos.TextSecondary"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:scrollbars="none"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tv_today_label">
+            android:layout_marginTop="8dp"
+            android:gravity="center"
+            android:text="Activa tu ubicación para ver el clima donde estás o busca cualquier ciudad del mundo."
+            android:textSize="15sp" />
 
-            <LinearLayout
-                android:id="@+id/container_hourly"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal" />
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_usar_ubicacion"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="Usar mi ubicación"
+            app:icon="@drawable/ic_my_location" />
 
-        </HorizontalScrollView>
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-</ScrollView>
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_ir_buscar"
+            style="@style/Widget.Material3.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Buscar una ciudad"
+            android:textColor="@color/text_on_glass" />
+    </LinearLayout>
+</FrameLayout>

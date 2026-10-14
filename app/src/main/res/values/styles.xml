@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Tarjeta tipo vidrio sobre el fondo dinámico -->
+    <style name="Atmos.Card">
+        <item name="android:background">@drawable/bg_glass</item>
+        <item name="android:padding">16dp</item>
+    </style>
+
+    <!-- Título pequeño de sección ("PRÓXIMAS 24 HORAS") -->
+    <style name="Atmos.SectionTitle">
+        <item name="android:textColor">@color/text_on_glass_secondary</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:letterSpacing">0.08</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:drawablePadding">6dp</item>
+        <item name="android:gravity">center_vertical</item>
+    </style>
+
+    <style name="Atmos.TextPrimary">
+        <item name="android:textColor">@color/text_on_glass</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+
+    <style name="Atmos.TextSecondary">
+        <item name="android:textColor">@color/text_on_glass_secondary</item>
+        <item name="android:textSize">13sp</item>
+    </style>
+
+    <style name="Atmos.TextTertiary">
+        <item name="android:textColor">@color/text_on_glass_tertiary</item>
+        <item name="android:textSize">12sp</item>
+    </style>
+
+    <!-- Valor grande de los mosaicos de detalle -->
+    <style name="Atmos.TileValue">
+        <item name="android:textColor">@color/text_on_glass</item>
+        <item name="android:textSize">26sp</item>
+        <item name="android:fontFamily">sans-serif-light</item>
+    </style>
+
+    <style name="Atmos.ScreenTitle">
+        <item name="android:textColor">@color/text_on_glass</item>
+        <item name="android:textSize">28sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+
+    <!-- Textos de los widgets -->
+    <style name="Atmos.Widget.Text">
+        <item name="android:textColor">#FFFFFFFF</item>
+        <item name="android:shadowColor">#40000000</item>
+        <item name="android:shadowRadius">4</item>
+        <item name="android:shadowDy">1</item>
+    </style>
+
+    <style name="Atmos.NavIndicator" parent="Widget.Material3.BottomNavigationView.ActiveIndicator">
+        <item name="android:color">@color/glass_strong</item>
+    </style>
+
+    <!-- Botones de opción (°C/°F, km/h...) y botones de widgets -->
+    <style name="Atmos.ToggleButton" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="android:textColor">@color/text_on_glass</item>
+        <item name="strokeColor">@color/glass_stroke</item>
+        <item name="backgroundTint">@color/toggle_bg</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+    </style>
+
+</resources>

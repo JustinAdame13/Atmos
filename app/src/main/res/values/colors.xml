@@ -21,4 +21,24 @@
     <color name="weather_cloudy">#FFB0BEC5</color>
     <color name="weather_rainy">#FF4FC3F7</color>
     <color name="weather_night">#FF3949AB</color>
+
+    <!-- v2: estilo "vidrio" sobre el fondo dinámico -->
+    <color name="glass">#26FFFFFF</color>
+    <color name="glass_strong">#38FFFFFF</color>
+    <color name="glass_stroke">#2EFFFFFF</color>
+    <color name="glass_dark">#40000000</color>
+    <color name="nav_glass">#B30A121C</color>
+    <color name="text_on_glass">#FFFFFFFF</color>
+    <color name="text_on_glass_secondary">#C7FFFFFF</color>
+    <color name="text_on_glass_tertiary">#8AFFFFFF</color>
+    <color name="divider_glass">#1FFFFFFF</color>
+
+    <!-- Fuentes de datos (para leyendas y comparativa) -->
+    <color name="fuente_openmeteo">#FFFFD54F</color>
+    <color name="fuente_openweather">#FF80DEEA</color>
+
+    <color name="lluvia">#FF81D4FA</color>
+    <color name="confianza_alta">#FF81C784</color>
+    <color name="confianza_media">#FFFFD54F</color>
+    <color name="confianza_baja">#FFFF8A65</color>
 </resources>

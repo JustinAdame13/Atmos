@@ -1,3 +1,17 @@
 <resources>
     <string name="app_name">Atmos</string>
+
+    <string name="widget_small_name">Atmos · Pequeño</string>
+    <string name="widget_medium_name">Atmos · Mediano</string>
+    <string name="widget_large_name">Atmos · Grande</string>
+    <string name="widget_small_desc">Temperatura y condición actual</string>
+    <string name="widget_medium_desc">Clima actual y próximas horas</string>
+    <string name="widget_large_desc">Clima actual, horas y próximos días</string>
+
+    <string name="canal_diario">Resumen diario</string>
+    <string name="canal_diario_desc">Un resumen del clima del día cada mañana</string>
+    <string name="canal_lluvia">Alertas de lluvia</string>
+    <string name="canal_lluvia_desc">Aviso cuando es probable que llueva en las próximas horas</string>
+
+    <string name="creditos_datos">Datos: OpenWeather · Open-Meteo</string>
 </resources>

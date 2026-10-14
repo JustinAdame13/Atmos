@@ -5,7 +5,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -14,22 +13,23 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.justin.atmos.Adapter.ForecastAdapter;
 import com.justin.atmos.R;
-import com.justin.atmos.Adapter.ForecastAdapter;
 import com.justin.atmos.ViewModel.WeatherViewModel;
-import com.justin.atmos.Adapter.FavoritesAdapter;
-import com.justin.atmos.Adapter.ForecastAdapter;
+import com.justin.atmos.model.ClimaCombinado;
 
+/**
+ * Pestaña de pronóstico extendido (hasta 16 días).
+ * Usa el mismo ViewModel que Inicio, así que no hace peticiones propias.
+ */
 public class ForecastFragment extends Fragment {
 
-    private WeatherViewModel viewModel;
     private ForecastAdapter adapter;
-    private TextView tvForecastCity;
+    private TextView tvForecastTitle, tvForecastCity, tvVacio;
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater,
-                             @Nullable ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_forecast, container, false);
     }
@@ -38,25 +38,28 @@ public class ForecastFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // ── conectar vistas ──────────────────────────────────
+        tvForecastTitle = view.findViewById(R.id.tv_forecast_title);
         tvForecastCity = view.findViewById(R.id.tv_forecast_city);
-        RecyclerView recyclerView = view.findViewById(R.id.rv_forecast);
+        tvVacio = view.findViewById(R.id.tv_forecast_vacio);
 
-        // ── configurar RecyclerView ──────────────────────────
+        RecyclerView rv = view.findViewById(R.id.rv_forecast);
+        rv.setLayoutManager(new LinearLayoutManager(requireContext()));
         adapter = new ForecastAdapter();
-        recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
-        recyclerView.setAdapter(adapter);
+        rv.setAdapter(adapter);
 
-        // ── obtener ViewModel compartido ─────────────────────
-        viewModel = new ViewModelProvider(requireActivity()).get(WeatherViewModel.class);
+        WeatherViewModel viewModel = new ViewModelProvider(requireActivity()).get(WeatherViewModel.class);
+        viewModel.clima.observe(getViewLifecycleOwner(), this::mostrar);
+    }
 
-        // ── observar datos ───────────────────────────────────
-        viewModel.pronostico.observe(getViewLifecycleOwner(), pronostico -> {
-            tvForecastCity.setText(pronostico.city.name);
-            adapter.setDatos(pronostico);
-        });
-
-        viewModel.error.observe(getViewLifecycleOwner(), error ->
-                Toast.makeText(requireContext(), error, Toast.LENGTH_SHORT).show());
+    private void mostrar(ClimaCombinado c) {
+        if (c == null || c.dias.isEmpty()) {
+            tvVacio.setVisibility(View.VISIBLE);
+            return;
+        }
+        tvVacio.setVisibility(View.GONE);
+        tvForecastTitle.setText("Pronóstico de " + c.dias.size() + " días");
+        String fuentes = c.tieneOpenWeather ? "Open-Meteo + OpenWeather" : "Open-Meteo";
+        tvForecastCity.setText(c.ubicacion.nombre + "  ·  " + fuentes);
+        adapter.setDatos(c);
     }
 }

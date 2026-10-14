@@ -1,19 +1,45 @@
 package com.justin.atmos.API;
 
+import java.util.concurrent.TimeUnit;
+
+import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
+/**
+ * Crea (una sola vez) los clientes Retrofit de las dos APIs.
+ * Patrón Singleton: igual que en la v1, pero ahora con dos "Retrofit",
+ * uno por cada servidor, compartiendo el mismo OkHttpClient.
+ */
 public class RetrofitClient {
 
-    private static final String BASE_URL = "https://api.openweathermap.org/data/2.5/";
+    private static final String URL_OPENWEATHER = "https://api.openweathermap.org/";
+    private static final String URL_OPENMETEO = "https://api.open-meteo.com/";
+
     private static RetrofitClient instance;
-    private final Retrofit retrofit;
+
+    private final WeatherService openWeather;
+    private final OpenMeteoService openMeteo;
 
     private RetrofitClient() {
-        retrofit = new Retrofit.Builder()
-                .baseUrl(BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create())
+        OkHttpClient http = new OkHttpClient.Builder()
+                .connectTimeout(15, TimeUnit.SECONDS)
+                .readTimeout(20, TimeUnit.SECONDS)
                 .build();
+
+        openWeather = new Retrofit.Builder()
+                .baseUrl(URL_OPENWEATHER)
+                .client(http)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build()
+                .create(WeatherService.class);
+
+        openMeteo = new Retrofit.Builder()
+                .baseUrl(URL_OPENMETEO)
+                .client(http)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build()
+                .create(OpenMeteoService.class);
     }
 
     public static synchronized RetrofitClient getInstance() {
@@ -23,7 +49,11 @@ public class RetrofitClient {
         return instance;
     }
 
-    public <T> T createService(Class<T> serviceClass) {
-        return retrofit.create(serviceClass);
+    public WeatherService openWeather() {
+        return openWeather;
+    }
+
+    public OpenMeteoService openMeteo() {
+        return openMeteo;
     }
 }

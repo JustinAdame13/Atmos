@@ -1,12 +1,16 @@
 package com.justin.atmos.ui;
 
+import android.content.Context;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
-import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -16,24 +20,30 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.justin.atmos.Adapter.SearchAdapter;
 import com.justin.atmos.R;
 import com.justin.atmos.ViewModel.WeatherViewModel;
+import com.justin.atmos.model.Ubicacion;
 import com.justin.atmos.storage.FavoritesManager;
 
+import java.util.List;
+
+/**
+ * Buscador con autocompletado: mientras escribes, aparecen ciudades del mundo
+ * (Open-Meteo Geocoding). Al tocar una, se abre en Inicio.
+ */
 public class SearchFragment extends Fragment {
 
     private WeatherViewModel viewModel;
-    private EditText etSearch;
     private SearchAdapter adapter;
-    private LinearLayout layoutEmpty;
-    private RecyclerView rvResults;
-    private boolean busquedaIniciada = false;
+    private EditText etBuscar;
+    private TextView tvHint;
+    private LinearProgressIndicator progreso;
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater,
-                             @Nullable ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_search, container, false);
     }
@@ -41,106 +51,83 @@ public class SearchFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
-        // ── conectar vistas ──────────────────────────────────────────────────
-        etSearch    = view.findViewById(R.id.et_search);
-        layoutEmpty = view.findViewById(R.id.layout_empty_search);
-        rvResults   = view.findViewById(R.id.rv_search_results);
-
-        // ── configurar RecyclerView ──────────────────────────────────────────
-        adapter = new SearchAdapter();
-        rvResults.setLayoutManager(new LinearLayoutManager(requireContext()));
-        rvResults.setAdapter(adapter);
-
-        // ── al tocar la tarjeta carga en Home y navega ───────────────────────
-        adapter.setOnItemClickListener(clima -> {
-            viewModel.cargarCiudadEnHome(clima);
-            navegarAHome();
-        });
-
-        // ── al tocar favorito ────────────────────────────────────────────────
-        adapter.setOnFavoriteClickListener(clima -> {
-            // TODO: reemplazar por FavoritesManager cuando esté disponible (Integrante B)
-            Toast.makeText(requireContext(),
-                    clima.cityName + (new FavoritesManager(requireContext()).esFavorito(clima.cityName)
-                            ? " guardado en favoritos"
-                            : " eliminado de favoritos"),
-                    Toast.LENGTH_SHORT).show();
-        });
-
-        // ── obtener ViewModel compartido ─────────────────────────────────────
         viewModel = new ViewModelProvider(requireActivity()).get(WeatherViewModel.class);
 
-        // ── buscar al presionar la tecla de búsqueda ─────────────────────────
-        etSearch.setOnEditorActionListener((v, actionId, event) -> {
+        etBuscar = view.findViewById(R.id.et_buscar);
+        tvHint = view.findViewById(R.id.tv_search_hint);
+        progreso = view.findViewById(R.id.progress_busqueda);
+
+        RecyclerView rv = view.findViewById(R.id.rv_search);
+        rv.setLayoutManager(new LinearLayoutManager(requireContext()));
+        adapter = new SearchAdapter(new FavoritesManager(requireContext()), new SearchAdapter.Listener() {
+            @Override
+            public void alSeleccionar(Ubicacion ubicacion) {
+                abrirEnInicio(ubicacion);
+            }
+
+            @Override
+            public void alCambiarFavorito(Ubicacion ubicacion, boolean ahoraEsFavorito) {
+                Toast.makeText(requireContext(),
+                        ahoraEsFavorito ? ubicacion.nombre + " agregado a favoritos ⭐" : "Quitado de favoritos",
+                        Toast.LENGTH_SHORT).show();
+            }
+        });
+        rv.setAdapter(adapter);
+
+        // Cada tecla → el ViewModel espera 350 ms y busca (debounce)
+        etBuscar.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) { }
+            @Override
+            public void afterTextChanged(Editable s) {
+                viewModel.buscar(s.toString());
+            }
+        });
+        etBuscar.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-                String ciudad = etSearch.getText().toString().trim();
-                if (!ciudad.isEmpty()) {
-                    busquedaIniciada = true;
-                    buscarCiudad(ciudad);
-                } else {
-                    Toast.makeText(requireContext(),
-                            "Escribe una ciudad", Toast.LENGTH_SHORT).show();
-                }
+                ocultarTeclado();
+                List<Ubicacion> res = viewModel.resultadosBusqueda.getValue();
+                if (res != null && !res.isEmpty()) abrirEnInicio(res.get(0));
                 return true;
             }
             return false;
         });
 
-        // ── observar resultados de búsqueda (no toca climaActual) ────────────
-        viewModel.climaBusqueda.observe(getViewLifecycleOwner(), clima -> {
-            if (clima != null && busquedaIniciada) {
-                adapter.setClima(clima);
-                mostrarResultados(true);
-                busquedaIniciada = false;
+        view.findViewById(R.id.btn_mi_ubicacion).setOnClickListener(v -> {
+            Ubicacion gps = com.justin.atmos.storage.Preferencias.ultimoGps(requireContext());
+            if (gps != null) {
+                abrirEnInicio(gps);
+            } else {
+                // Sin GPS previo: Inicio pedirá el permiso / ubicación
+                ((MainActivity) requireActivity()).irAPestana(R.id.nav_home);
             }
         });
 
-        // ── observar errores ─────────────────────────────────────────────────
-        viewModel.error.observe(getViewLifecycleOwner(), error -> {
-            if (busquedaIniciada) {
-                mostrarResultados(false);
-                busquedaIniciada = false;
-                Toast.makeText(requireContext(), error, Toast.LENGTH_SHORT).show();
+        viewModel.resultadosBusqueda.observe(getViewLifecycleOwner(), lista -> {
+            adapter.setLista(lista);
+            String texto = etBuscar.getText() != null ? etBuscar.getText().toString().trim() : "";
+            if (lista.isEmpty() && texto.length() >= 2 && !Boolean.TRUE.equals(viewModel.buscando.getValue())) {
+                tvHint.setVisibility(View.VISIBLE);
+                tvHint.setText("No encontramos \"" + texto + "\".\nRevisa la ortografía o prueba con otra ciudad.");
+            } else if (lista.isEmpty()) {
+                tvHint.setVisibility(View.VISIBLE);
+                tvHint.setText("Escribe al menos 2 letras.\nPuedes buscar cualquier ciudad del mundo 🌎");
+            } else {
+                tvHint.setVisibility(View.GONE);
             }
         });
-
-        // ── si ya hay datos previos de búsqueda mostrarlos ───────────────────
-        if (viewModel.climaBusqueda.getValue() != null) {
-            adapter.setClima(viewModel.climaBusqueda.getValue());
-            mostrarResultados(true);
-        }
+        viewModel.buscando.observe(getViewLifecycleOwner(), b ->
+                progreso.setVisibility(Boolean.TRUE.equals(b) ? View.VISIBLE : View.INVISIBLE));
     }
 
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        busquedaIniciada = false;
+    private void abrirEnInicio(Ubicacion ubicacion) {
+        ocultarTeclado();
+        viewModel.cargarUbicacion(ubicacion, false);
+        ((MainActivity) requireActivity()).irAPestana(R.id.nav_home);
     }
 
-    // ── métodos privados ──────────────────────────────────────────────────────
-
-    private void buscarCiudad(String ciudad) {
-        adapter.setClima(null);
-        mostrarResultados(false);
-        viewModel.buscarClima(ciudad);
-    }
-
-    private void mostrarResultados(boolean hayResultados) {
-        if (hayResultados) {
-            rvResults.setVisibility(View.VISIBLE);
-            layoutEmpty.setVisibility(View.GONE);
-        } else {
-            rvResults.setVisibility(View.GONE);
-            layoutEmpty.setVisibility(View.VISIBLE);
-        }
-    }
-
-    private void navegarAHome() {
-        requireActivity().runOnUiThread(() -> {
-            com.google.android.material.bottomnavigation.BottomNavigationView nav =
-                    requireActivity().findViewById(R.id.bottom_navigation);
-            nav.setSelectedItemId(R.id.nav_home);
-        });
+    private void ocultarTeclado() {
+        InputMethodManager imm = (InputMethodManager) requireContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (imm != null) imm.hideSoftInputFromWindow(etBuscar.getWindowToken(), 0);
     }
 }

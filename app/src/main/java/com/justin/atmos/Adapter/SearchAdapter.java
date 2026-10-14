@@ -9,176 +9,88 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.airbnb.lottie.LottieAnimationView;
 import com.justin.atmos.R;
-import com.justin.atmos.model.ClimaActual;
-
-import java.util.Locale;
+import com.justin.atmos.model.Ubicacion;
 import com.justin.atmos.storage.FavoritesManager;
 
-public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.SearchViewHolder> {
+import java.util.ArrayList;
+import java.util.List;
 
-    public interface OnFavoriteClickListener {
-        void onFavoriteClick(ClimaActual clima);
+/**
+ * Resultados del buscador (Open-Meteo Geocoding).
+ * Tocar una fila abre la ciudad en Inicio; la estrella la agrega/quita de favoritos.
+ */
+public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder> {
+
+    public interface Listener {
+        void alSeleccionar(Ubicacion ubicacion);
+        void alCambiarFavorito(Ubicacion ubicacion, boolean ahoraEsFavorito);
     }
 
-    private ClimaActual climaActual = null;
-    private OnFavoriteClickListener favoriteListener;
+    private final List<Ubicacion> lista = new ArrayList<>();
+    private final FavoritesManager favoritos;
+    private final Listener listener;
 
-    public void setClima(ClimaActual clima) {
-        this.climaActual = clima;
+    public SearchAdapter(FavoritesManager favoritos, Listener listener) {
+        this.favoritos = favoritos;
+        this.listener = listener;
+    }
+
+    public void setLista(List<Ubicacion> nueva) {
+        lista.clear();
+        if (nueva != null) lista.addAll(nueva);
         notifyDataSetChanged();
-    }
-
-    public void setOnFavoriteClickListener(OnFavoriteClickListener listener) {
-        this.favoriteListener = listener;
     }
 
     @NonNull
     @Override
-    public SearchViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_search, parent, false);
-        return new SearchViewHolder(view);
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_search, parent, false);
+        return new ViewHolder(v);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull SearchViewHolder holder, int position) {
-        if (climaActual == null) return;
+    public void onBindViewHolder(@NonNull ViewHolder h, int position) {
+        Ubicacion u = lista.get(position);
+        String bandera = u.bandera();
+        h.tvBandera.setText(bandera.isEmpty() ? "🌎" : bandera);
+        h.tvCiudad.setText(u.nombre);
+        h.tvRegion.setText(u.subtitulo());
 
-        holder.tvCityName.setText(climaActual.cityName);
+        boolean esFav = favoritos.esFavorito(u);
+        h.btnFavorito.setImageResource(esFav ? R.drawable.ic_star : R.drawable.ic_star_outline);
 
-        String country = "";
-        if (climaActual.sys != null && climaActual.sys.country != null) {
-            country = climaActual.sys.country;
-        }
-        holder.tvCountry.setText(country);
-
-        if (climaActual.weather != null && !climaActual.weather.isEmpty()) {
-            String desc = climaActual.weather.get(0).description;
-            holder.tvWeatherDesc.setText(
-                    desc.substring(0, 1).toUpperCase() + desc.substring(1));
-
-            int weatherId = climaActual.weather.get(0).id;
-            int animRes = elegirAnimacion(
-                    weatherId,
-                    climaActual.dt,
-                    climaActual.sys != null ? climaActual.sys.sunrise : 0,
-                    climaActual.sys != null ? climaActual.sys.sunset : 0
-            );
-            holder.lottieIcon.setAnimation(animRes);
-            holder.lottieIcon.playAnimation();
-        }
-
-        holder.tvTemperature.setText(
-                String.format(Locale.getDefault(), "%.0f°C", climaActual.main.temp));
-
-        // ── FAVORITO: tint según estado ──────────────────────────────────────
-        FavoritesManager fm = new FavoritesManager(holder.itemView.getContext());
-        if (fm.esFavorito(climaActual.cityName)) {
-            holder.btnFavorite.setColorFilter(
-                    android.graphics.Color.parseColor("#FF1744"));
-        } else {
-            holder.btnFavorite.clearColorFilter();
-        }
-
-        holder.btnFavorite.setOnClickListener(v -> {
-            if (fm.esFavorito(climaActual.cityName)) {
-                fm.eliminarFavorito(climaActual.cityName);
-                holder.btnFavorite.clearColorFilter();
+        h.itemView.setOnClickListener(v -> listener.alSeleccionar(u));
+        h.btnFavorito.setOnClickListener(v -> {
+            boolean ahora;
+            if (favoritos.esFavorito(u)) {
+                favoritos.eliminarFavorito(u);
+                ahora = false;
             } else {
-                fm.guardarFavorito(climaActual);
-                holder.btnFavorite.setColorFilter(
-                        android.graphics.Color.parseColor("#FF1744"));
+                favoritos.guardarFavorito(u);
+                ahora = true;
             }
-            if (favoriteListener != null) {
-                favoriteListener.onFavoriteClick(climaActual);
-            }
+            int pos = h.getBindingAdapterPosition();
+            if (pos != RecyclerView.NO_POSITION) notifyItemChanged(pos);
+            listener.alCambiarFavorito(u, ahora);
         });
-        holder.itemView.setOnClickListener(v -> {
-            if (itemClickListener != null) {
-                itemClickListener.onItemClick(climaActual);
-            }
-        });
-
     }
 
     @Override
     public int getItemCount() {
-        return climaActual != null ? 1 : 0;
+        return lista.size();
     }
 
-    static class SearchViewHolder extends RecyclerView.ViewHolder {
-        TextView tvCityName, tvCountry, tvWeatherDesc, tvTemperature;
-        LottieAnimationView lottieIcon;
-        ImageButton btnFavorite;
+    static class ViewHolder extends RecyclerView.ViewHolder {
+        final TextView tvBandera, tvCiudad, tvRegion;
+        final ImageButton btnFavorito;
 
-        SearchViewHolder(@NonNull View itemView) {
-            super(itemView);
-            tvCityName    = itemView.findViewById(R.id.tv_city_name);
-            tvCountry     = itemView.findViewById(R.id.tv_country);
-            tvWeatherDesc = itemView.findViewById(R.id.tv_weather_desc);
-            tvTemperature = itemView.findViewById(R.id.tv_temperature);
-            lottieIcon    = itemView.findViewById(R.id.iv_weather_icon);
-            btnFavorite   = itemView.findViewById(R.id.btn_favorite);
+        ViewHolder(@NonNull View v) {
+            super(v);
+            tvBandera = v.findViewById(R.id.tv_bandera);
+            tvCiudad = v.findViewById(R.id.tv_search_city);
+            tvRegion = v.findViewById(R.id.tv_search_region);
+            btnFavorito = v.findViewById(R.id.btn_search_favorito);
         }
-    }
-
-    // Misma lógica que HomeFragment — devuelve raw Lottie
-    private int elegirAnimacion(int weatherId, long ahora, long sunrise, long sunset) {
-        boolean esDeNoche = ahora < sunrise || ahora > sunset;
-
-        // Tormenta eléctrica: 200–232
-        if (weatherId >= 200 && weatherId <= 232) return R.raw.anim_storm;
-
-        // Llovizna: 300–321
-        if (weatherId >= 300 && weatherId <= 321) {
-            return esDeNoche ? R.raw.anim_rainy_night : R.raw.anim_rainy_day;
-        }
-
-        // Lluvia: 500–531
-        if (weatherId >= 500 && weatherId <= 531) {
-            return esDeNoche ? R.raw.anim_rainy_night : R.raw.anim_rainy_day;
-        }
-
-        // Nieve: 600–622
-        if (weatherId >= 600 && weatherId <= 622) {
-            return esDeNoche ? R.raw.anim_cloudy_night : R.raw.anim_cloudy_day;
-        }
-
-        // Atmósfera (niebla, neblina, humo, etc.): 701–781
-        if (weatherId >= 701 && weatherId <= 781) {
-            return esDeNoche ? R.raw.anim_cloudy_night : R.raw.anim_cloudy_day;
-        }
-
-        // Tornado: 781–799
-        if (weatherId >= 781 && weatherId <= 799) return R.raw.anim_thunder;
-
-        // Cielo despejado: 800
-        if (weatherId == 800) {
-            return esDeNoche ? R.raw.anim_night : R.raw.anim_sunny;
-        }
-
-        // Algo nublado (pocas nubes): 801
-        if (weatherId == 801) {
-            return esDeNoche ? R.raw.anim_cloudy_night : R.raw.anim_cloudy_day;
-        }
-
-        // Nublado: 802–804
-        if (weatherId >= 802 && weatherId <= 804) {
-            return esDeNoche ? R.raw.anim_cloudy_night : R.raw.anim_cloudy_day;
-        }
-
-        // Fallback
-        return esDeNoche ? R.raw.anim_night : R.raw.anim_sunny;
-    }
-    public interface OnItemClickListener {
-        void onItemClick(ClimaActual clima);
-    }
-
-    private OnItemClickListener itemClickListener;
-
-    public void setOnItemClickListener(OnItemClickListener listener) {
-        this.itemClickListener = listener;
     }
 }

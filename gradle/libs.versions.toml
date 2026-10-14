@@ -12,6 +12,8 @@ gson = "2.9.0"
 glide = "4.16.0"
 playServicesLocation = "21.3.0"
 lottie = "6.4.0"
+swiperefreshlayout = "1.1.0"
+recyclerview = "1.4.0"
 
 [libraries]
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -27,6 +29,8 @@ gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
 glide = { group = "com.github.bumptech.glide", name = "glide", version.ref = "glide" }
 play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation"}
 lottie = { group = "com.airbnb.android", name = "lottie", version.ref = "lottie" }
+swiperefreshlayout = { group = "androidx.swiperefreshlayout", name = "swiperefreshlayout", version.ref = "swiperefreshlayout" }
+recyclerview = { group = "androidx.recyclerview", name = "recyclerview", version.ref = "recyclerview" }
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 
